@@ -1,4 +1,5 @@
-(ns numberto.farey)
+(ns numberto.farey
+  (:require [numberto.math :as m]))
 
 ;; Farey sequence. Lazy. Finite.
 ;;
@@ -13,3 +14,11 @@
                 (cons next-term (lazy-seq (next-farey r2 next-term))))))]
     (let [a 0 b 1 c 1 d n]
       (concat [[a b] [c d]] (lazy-seq (next-farey [a b] [c d]))))))
+
+(defn farey-size [n]
+  "TODO"
+  )
+
+(defn farey-size-approximate [n]
+  "Good approximation for Farey Sequence"
+  (/ (* 3 n n) (m/sqr m/PI)))
