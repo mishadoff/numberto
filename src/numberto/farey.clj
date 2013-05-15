@@ -16,9 +16,9 @@
       (concat [[a b] [c d]] (lazy-seq (next-farey [a b] [c d]))))))
 
 (defn farey-size [n]
-  "TODO"
-  )
+  (- (/ (* n (+ n 3)) 2)
+     (reduce + (map #(farey-size (quot n %)) (range 2 (inc n))))))
 
 (defn farey-size-approximate [n]
   "Good approximation for Farey Sequence"
-  (/ (* 3 n n) (m/sqr m/PI)))
+  (/ (* 3 n n) (m/square m/PI)))

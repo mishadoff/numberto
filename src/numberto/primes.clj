@@ -12,3 +12,12 @@
   (and (> p 1)
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))
+
+(defn factorize [n]
+  (loop [x n fact []]
+    (if (= 1 x) fact
+        (let [d (first (drop-while #(not (zero? (rem x %))) (primes)))]
+          (recur (/ x d) (conj fact d))))))
+
+(defn totient [n]
+  (reduce * n (map #(- 1 (/ 1 %)) (factorize n))))
