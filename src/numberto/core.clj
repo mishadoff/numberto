@@ -10,4 +10,7 @@
   (let [coll (num->digits n)]
     (= (reverse coll) coll)))
 
+;; TODO reverse num
+;; TODO permutations?
 ;; TODO pandigital
+;; TODO shift number (right, left)

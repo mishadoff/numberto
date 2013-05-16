@@ -15,4 +15,6 @@
 (def powers-of-two (iterate (partial *' 2) 1))
 
 ;; TODO triangle sequence
+;; TODO pentagonal sequence
+;; TODO hexagonal sequence
 ;; TODO collatz sequence
