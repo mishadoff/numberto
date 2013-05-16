@@ -16,6 +16,7 @@
       (concat [[a b] [c d]] (lazy-seq (next-farey [a b] [c d]))))))
 
 (defn farey-size [n]
+  "TODO must be improved"
   (- (/ (* n (+ n 3)) 2)
      (reduce + (map #(farey-size (quot n %)) (range 2 (inc n))))))
 

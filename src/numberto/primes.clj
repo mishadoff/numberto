@@ -13,6 +13,9 @@
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))
 
+;; TODO amicable numbers
+;; TODO abundant
+
 (defn factorize [n]
   (loop [x n fact []]
     (if (= 1 x) fact
