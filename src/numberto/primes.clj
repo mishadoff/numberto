@@ -1,7 +1,7 @@
 (ns numberto.primes)
 
-;; Prime numbers
 (defn primes []
+  "Lazy sequence of prime numbers"
   (letfn [(next-prime [p ps]
             (cond (some #(zero? (mod p %)) (take-while #(<= (* % %) p) ps))
                   (recur (+ p 2) ps)
@@ -9,18 +9,23 @@
     (cons 2 (lazy-seq (next-prime 3 [])))))
 
 (defn prime? [p]
+  "check whether number is prime"
   (and (> p 1)
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))
 
-;; TODO amicable numbers
-;; TODO abundant
-
 (defn factorize [n]
+  "factorize number to prime muliplies"
   (loop [x n fact []]
     (if (= 1 x) fact
         (let [d (first (drop-while #(not (zero? (rem x %))) (primes)))]
           (recur (/ x d) (conj fact d))))))
 
 (defn totient [n]
-  (reduce * n (map #(- 1 (/ 1 %)) (factorize n))))
+  "Euler's totient function. BigInt."
+  (reduce * n (map #(- 1 (/ 1 %)) (distinct (factorize n)))))
+
+;; TODO perfect numbers
+;; TODO amicable numbers
+;; TODO abundant
+;; TODO carmichael function

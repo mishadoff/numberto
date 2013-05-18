@@ -28,7 +28,7 @@
   (= n (square (int (sqroot n)))))
 
 (defn sum [coll]
-  "sum all elements in collection"
+  "sum all elements in collection of numbers"
   (reduce +' coll))
 
 (defn abs [x]
@@ -36,7 +36,7 @@
   (if (neg? x) (- x) x))
 
 (defn avg [coll]
-  "return average of collection. always double"
+  "return average of collection of numbers. always double"
   (double (/ (sum coll) (count coll))))
 
 (defn product [coll]
@@ -55,9 +55,3 @@
 (defn lcm [a b]
   "least common multiple"
   (/ (abs (*' a b)) (gcd a b)))
-
-;;;;;;;;;
-;; TODO
-;;;;;;;;;
-
-;; Euler's Totient Function phi
