@@ -9,7 +9,7 @@
     (cons 2 (lazy-seq (next-prime 3 [])))))
 
 (defn prime? [p]
-  "check whether number is prime"
+  "check whether number is prime. Complexity O(sqrt(p))"
   (and (> p 1)
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))

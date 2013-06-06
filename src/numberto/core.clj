@@ -46,5 +46,9 @@
         split-pos (mod (- n cnt) n)]
     (shift-left num split-pos)))
 
-;; TODO permutations?
+(defn permutation? [num1 num2]
+  "test whether two numbers are permutations of each other' digits"
+  (let [f (comp frequencies num->digits)]
+    (= (f num1) (f num2))))
+
 ;; TODO pandigital

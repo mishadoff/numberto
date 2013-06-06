@@ -15,6 +15,13 @@
   "x to the nth power. n must be an integer"
   (reduce *' (repeat n x)))
 
+(defn power* [x n]
+  "x to the nth power by squaring. O(log n)"
+  (cond (= 0 n) 1
+        (= 1 n) x
+        (even? n) (power* (*' x x) (/ n 2))
+        (odd? n) (*' x (power* (*' x x) (/ (dec n) 2)))))
+
 (defn square [x]
   "x to the square. similar to (* x x)"
   (power x 2))
@@ -42,10 +49,6 @@
 (defn product [coll]
   "multiplies all elements in collection"
   (reduce *' coll))
-
-(defn factorial [n]
-  "return factorial of number. n must be a non-negative integer"
-  (reduce *' (range 1 (inc n))))
 
 (defn gcd [a b]
   "greatest common divisor. Euclidean algorithm"
