@@ -4,7 +4,9 @@
 
 (defn ! [n]
   "Standard factorial version"
-  (reduce *' (range 1 (inc n))))
+  (loop [cur n acc 1]
+    (if (zero? cur) acc
+        (recur (dec cur) (*' cur acc)))))
 
 (defn- find-power [n k]
   "Return the power of factorization prime number k for number n!"
@@ -15,6 +17,8 @@
 
 (defn !! [n]
   "Improved version of factorial by factorization"
-  (reduce *'
-          (map #(m/power* % (find-power n %))
-               (take-while #(<= % n) (p/primes)))))
+  (loop [[h & t] 
+         (map #(m/power* % (find-power n %))
+              (take-while #(<= % n) (p/primes)))
+         acc 1]
+    (if h (recur t (*' h acc)) acc)))
