@@ -14,6 +14,9 @@
 ;; Powers of two [1 2 4 8 16 ...]
 (def powers-of-two (iterate (partial *' 2) 1))
 
+;; Triangle numbers
+(def triangles (reductions + naturals))
+
 ;; TODO triangle sequence
 ;; TODO pentagonal sequence
 ;; TODO hexagonal sequence

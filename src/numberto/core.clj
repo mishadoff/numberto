@@ -1,5 +1,6 @@
 (ns numberto.core)
 
+;; TODO move to converters
 (defn char->digit [char]
   "cast char to digit"
   (- (int char) 48))
