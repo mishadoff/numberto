@@ -17,7 +17,6 @@
 ;; Triangle numbers
 (def triangles (reductions + naturals))
 
-;; TODO triangle sequence
 ;; TODO pentagonal sequence
 ;; TODO hexagonal sequence
 ;; TODO collatz sequence
