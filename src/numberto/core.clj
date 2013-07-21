@@ -1,4 +1,5 @@
-(ns numberto.core)
+(ns numberto.core
+  (:require [numberto.math :as m]))
 
 ;; TODO move to converters
 (defn char->digit [char]
@@ -20,6 +21,10 @@
 (defn count-digits [num]
   "return amount of digits for number"
   (count (num->digits num)))
+
+(defn sum-of-digits [num]
+  "return sum of digits for number"
+  (m/sum (num->digits num)))
 
 (defn palindrome? [num]
   (let [coll (num->digits num)]
