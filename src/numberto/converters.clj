@@ -1,29 +1,29 @@
 (ns numberto.converters
   (:require [numberto.predicates :as p]))
 
-(defn char->digit [char]
+(defn char->digit [c]
   "cast char to digit"
-  (let [n (- (int char) 48)]
+  (let [n (- (int c) 48)]
     (cond 
      (p/digit? n) n
      :else (throw (IllegalArgumentException. "char must be a convertable number")))))
 
-(defn digit->char [digit]
+(defn digit->char [d]
   "cast digit to char representation"
   (cond
-   (p/digit? digit) (char (+ digit 48))
+   (p/digit? d) (char (+ d 48))
    :else (throw (IllegalArgumentException. "digit must be a number [0-9]"))))
 
-(defn num->digits [num]
+(defn num->digits [n]
   "split an integer number to the list of digits"
   (cond 
-   (integer? num) (map char->digit (seq (str num)))
+   (integer? n) (map char->digit (seq (str n)))
    :else (throw (IllegalArgumentException. "num must be an integer"))))
 
-(defn digits->num [digits]
+(defn digits->num [ds]
   "construct a number from list of digits"
   (cond
-   (every? p/digit? digits) (bigint (apply str digits))
+   (every? p/digit? ds) (bigint (apply str ds))
    :else (throw (IllegalArgumentException. "digits must contain only numbers [0-9]"))))
 
 ;; TODO binary, hex, oct
