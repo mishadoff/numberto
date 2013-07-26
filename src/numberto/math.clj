@@ -1,9 +1,5 @@
 (ns numberto.math)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Utils package for mathematic functions and constants
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;; Constants
 
 (def PI Math/PI)
@@ -12,15 +8,23 @@
 ;; Functions
 
 (defn power [x n]
-  "x to the nth power. n must be an integer"
-  (reduce *' (repeat n x)))
+  "x to the nth power"
+  (cond 
+   (not (number? x)) (throw (IllegalArgumentException. "x must be a number"))
+   (or (not (integer? n)) (neg? n)) (throw (IllegalArgumentException. "n must be a non-negative integer"))
+   :else (reduce *' (repeat n x))))
 
 (defn power* [x n]
   "x to the nth power by squaring. O(log n)"
-  (cond (= 0 n) 1
-        (= 1 n) x
-        (even? n) (power* (*' x x) (/ n 2))
-        (odd? n) (*' x (power* (*' x x) (/ (dec n) 2)))))
+  (cond 
+   (not (number? x)) (throw (IllegalArgumentException. "x must be a number"))
+   (or (not (integer? n)) (neg? n)) (throw (IllegalArgumentException. "n must be a non-negative integer"))
+   :else (letfn [(pow [x n] 
+                   (cond (= 0 n) 1
+                         (= 1 n) x
+                         (even? n) (pow (*' x x) (/ n 2))
+                         (odd? n) (*' x (pow (*' x x) (/ (dec n) 2)))))]
+           (pow x n))))
 
 (defn square [x]
   "x to the square. similar to (* x x)"
