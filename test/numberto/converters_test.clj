@@ -25,7 +25,6 @@
   (is (thrown? IllegalArgumentException (c/digits->num [1 2 "3"])))
   (is (thrown? IllegalArgumentException (c/digits->num ["99N"]))))
    
-
 (run-tests)
 
 
