@@ -12,10 +12,6 @@
   (let [coll (c/num->digits num)]
     (= (reverse coll) coll)))
 
-(defn digit? [digit]
-  "Test whether number is one-digit [0-9]"
-  (<= 0 digit 9))
-
 (defn reverse-num [num]
   "reverses a number"
   (c/digits->num (reverse (c/num->digits num))))
@@ -38,5 +34,3 @@
   "test whether two numbers are permutations of each other' digits"
   (let [f (comp frequencies c/num->digits)]
     (= (f num1) (f num2))))
-
-;; TODO pandigital
