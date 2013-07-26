@@ -2,6 +2,7 @@
 
 ;; Constants
 
+;; TODO [ENHANCEMENT] return needed number of digits
 (def PI Math/PI)
 (def E Math/E)
 
@@ -27,33 +28,47 @@
            (pow x n))))
 
 (defn square [x]
-  "x to the square. similar to (* x x)"
+  "x to the square"
   (power x 2))
 
 (defn sqroot [x]
   "square root of x. always double"
-  (Math/sqrt x))
+  (cond
+   (or (not (number? x)) (neg? x)) (throw (IllegalArgumentException. "x must be a non-negative number"))
+   :else (Math/sqrt x)))
 
+;; TODO [ENHANCEMENT] replace Math/sqrt as it returns double
+;; TODO [IMPL] implement sqroot-int
+
+;; TODO [TEST] cover with tests
+;; TODO [IMPL] extend for bignumbers
 (defn square? [n]
   "test whether number is exact square or no"
   (= n (square (int (sqroot n)))))
 
 (defn sum [coll]
-  "sum all elements in collection of numbers"
+  "sum all elements in a collection of numbers"
   (reduce +' coll))
 
 (defn abs [x]
   "return absolute value of x"
-  (if (neg? x) (- x) x))
+  (cond 
+   (not (number? x)) (throw (IllegalArgumentException. "x must be a number"))
+   (neg? x) (- x) 
+   :else x))
 
 (defn avg [coll]
   "return average of collection of numbers. always double"
-  (double (/ (sum coll) (count coll))))
+  (cond
+   (empty? coll) 0
+   :else (double (/ (sum coll) (count coll)))))
 
 (defn product [coll]
   "multiplies all elements in collection"
   (reduce *' coll))
 
+;; TODO [TEST] cover
+;; TODO [IMPL] Error handling
 (defn gcd [a b]
   "greatest common divisor. Euclidean algorithm"
   (if (zero? b) a
