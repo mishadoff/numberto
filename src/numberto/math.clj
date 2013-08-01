@@ -1,12 +1,8 @@
 (ns numberto.math)
 
-;; Constants
-
 ;; TODO [ENHANCEMENT] return needed number of digits
 (def PI Math/PI)
 (def E Math/E)
-
-;; Functions
 
 (defn power [x n]
   "x to the nth power"
@@ -49,7 +45,7 @@
   (= n (square (int (sqroot n)))))
 
 (defn sum [coll]
-  "sum all elements in a collection of numbers"
+  "sum all elements in a collection"
   (reduce +' coll))
 
 (defn abs [x]

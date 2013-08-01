@@ -7,7 +7,7 @@ All you need to play with numbers
 * **numberto.core**
 	* `count-digits`
 	* `sum-of-digits`
-	* `palindrome?`
+	* `palindrome?` [PRED]
 	* `reverse-num`
 	* `shift-left`
 	* `shift-right`
@@ -19,7 +19,7 @@ All you need to play with numbers
     * `power*`
     * `square`
     * `sqroot`
-    * `square?`
+    * `square?` [PRED]
 	* `sum`
 	* `abs`
 	* `avg`
@@ -33,5 +33,9 @@ All you need to play with numbers
     * `digits->num`
 * **numberto.predicates**
     * `digit?`
-
+* **numberto.primes**
+    * `primes`
+    * `prime?` [PRED] 
+    * `factorize`
+    * `totient`
 

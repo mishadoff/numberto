@@ -8,6 +8,7 @@
                   :else (cons p (lazy-seq (next-prime (+ p 2) (conj ps p))))))]
     (cons 2 (lazy-seq (next-prime 3 [])))))
 
+;; TODO [REFACTOR] move to predicates
 (defn prime? [p]
   "check whether number is prime. Complexity O(sqrt(p))"
   (and (> p 1)
@@ -21,6 +22,7 @@
         (let [d (first (drop-while #(not (zero? (rem x %))) (primes)))]
           (recur (/ x d) (conj fact d))))))
 
+;; TODO [TEST]
 (defn totient [n]
   "Euler's totient function. BigInt."
   (reduce * n (map #(- 1 (/ 1 %)) (distinct (factorize n)))))
