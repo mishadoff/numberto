@@ -12,10 +12,30 @@
 (deftest square?-test
   (is (every? p/square? [0 1 4 9 16 225]))
   (is (every? (comp not p/square?) [11 23 325 123 43 123 87 129 143 12223]))
-  (is (false? (p/square? 1025)))
-  (is (false? (p/square? "Hello")))
-  (is (false? (p/square? [12]))))
+  (is (false? (p/square? 1025))))
 
+(deftest palindrome?-test
+  (is (p/palindrome? 123454321))
+  (is (false? (p/palindrome? 1025))))
+
+(deftest permutation?-test
+  (is (p/permutation? 1232352 2335221))
+  (is (false? (p/permutation? 1232352 2235221)))
+  (is (false? (p/permutation? 22111 11121)))
+  (is (p/permutation? 9999 9999)))
 
 (run-tests)
+
+
+
+
+
+
+
+
+
+
+
+
+
 

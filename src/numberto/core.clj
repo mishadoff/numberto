@@ -8,10 +8,6 @@
 (defn sum-of-digits [num]
   (m/sum (c/num->digits num)))
 
-(defn palindrome? [num]
-  (let [coll (c/num->digits num)]
-    (= (reverse coll) coll)))
-
 (defn reverse-num [num]
   "reverses a number"
   (c/digits->num (reverse (c/num->digits num))))
@@ -29,8 +25,3 @@
   (let [n (count-digits num)
         split-pos (mod (- n cnt) n)]
     (shift-left num split-pos)))
-
-(defn permutation? [num1 num2]
-  "test whether two numbers are permutations of each other' digits"
-  (let [f (comp frequencies c/num->digits)]
-    (= (f num1) (f num2))))

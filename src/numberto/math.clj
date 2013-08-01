@@ -39,7 +39,6 @@
 ;; TODO [TEST] cover with tests
 ;; TODO [IMPL] extend for bignumbers
 
-;; TOOD [REFACTOR] move to predicate?
 (defn square? [n]
   "test whether number is exact square or no"
   (= n (square (int (sqroot n)))))
