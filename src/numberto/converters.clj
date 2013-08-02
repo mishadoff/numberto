@@ -1,4 +1,5 @@
-(ns numberto.converters)
+(ns numberto.converters
+  (:require [numberto.validator :as v]))
 
 (defn digit? [digit]
   "Test whether number is one-digit [0-9]"
@@ -19,9 +20,8 @@
 
 (defn num->digits [n]
   "split an integer number to the list of digits"
-  (cond 
-   (integer? n) (map char->digit (seq (str n)))
-   :else (throw (IllegalArgumentException. "num must be an integer"))))
+  (v/validate n :integer)
+  (map char->digit (seq (str n))))
 
 (defn digits->num [ds]
   "construct a number from list of digits"
@@ -29,4 +29,4 @@
    (every? digit? ds) (bigint (apply str ds))
    :else (throw (IllegalArgumentException. "digits must contain only numbers [0-9]"))))
 
-;; TODO binary, hex, oct
+;; TODO [binary, hex, oct]

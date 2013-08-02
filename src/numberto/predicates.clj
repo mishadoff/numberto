@@ -16,4 +16,3 @@
   "test whether two numbers are permutations of each other' digits"
   (let [f (comp frequencies conv/num->digits)]
     (= (f num1) (f num2))))
-  
