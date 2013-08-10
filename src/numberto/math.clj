@@ -1,8 +1,35 @@
 (ns numberto.math
-  (:require [numberto.validator :as v]))
+  (:require [numberto.validator :as v])
+  (:require [numberto.converters :as c]))
 
 (def PI Math/PI)
 (def E Math/E)
+
+(declare sum)
+
+(defn count-digits [num]
+  (count (c/num->digits num)))
+
+(defn sum-of-digits [num]
+  (sum (c/num->digits num)))
+
+(defn reverse-num [num]
+  "reverses a number"
+  (c/digits->num (reverse (c/num->digits num))))
+
+(defn shift-left [num cnt]
+  "shift number digits to the left by specified amount of shifts.
+   Number of shifts can be greater than the size of number."
+  (let [n (count-digits num)
+        [a b] (split-at (mod cnt n) (c/num->digits num))]
+    (c/digits->num (concat b a))))
+
+(defn shift-right [num cnt]
+  "shift number digits to the right by specified amount of shifts.
+   Number of shifts can be greater than the size of number."
+  (let [n (count-digits num)
+        split-pos (mod (- n cnt) n)]
+    (shift-left num split-pos)))
 
 (defn power [x n]
   "x to the nth power"
