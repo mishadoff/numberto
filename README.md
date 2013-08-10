@@ -2,24 +2,25 @@
 
 All you need to play with numbers
 
-### Included
+### Usage Example
 
-* **numberto.core**
+[ TODO ]
+
+### Full Reference
+
+* **numberto.math**
+    * `PI`
+    * `E`
 	* `count-digits`
 	* `sum-of-digits`
-	* `palindrome?` [PRED]
 	* `reverse-num`
 	* `shift-left`
 	* `shift-right`
 	* `permutation?`
-* **numberto.math**
-    * `PI`
-    * `E`
     * `power`
     * `power*`
     * `square`
     * `sqroot`
-    * `square?` [PRED]
 	* `sum`
 	* `abs`
 	* `avg`
@@ -33,9 +34,13 @@ All you need to play with numbers
     * `digits->num`
 * **numberto.predicates**
     * `digit?`
+	* `palindrome?`
+	* `square?`
+	* `permutation?`
+	* `prime?`
 * **numberto.primes**
     * `primes`
-    * `prime?` [PRED] 
     * `factorize`
-    * `totient`
-
+* **numberto.factorial**
+	* `!`
+	* `!!`
