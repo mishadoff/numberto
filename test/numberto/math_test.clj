@@ -47,7 +47,26 @@
 (deftest product-test
   (is (= 120 (m/product [1 2 3 4 5])))
   (is (= 1 (m/product []))))
-  
+
+(deftest gcd-test
+  (is (= 1 (m/gcd 3 5)))
+  (is (= 10 (m/gcd 3528375238957920 38523856236590)))
+  (is (= 2 (m/gcd 6 4)))
+  (is (= 3 (m/gcd 6 3)))
+  (is (= 6 (m/gcd 6 0)))
+  (is (= 0 (m/gcd 0 0)))
+  (is (= 6 (m/gcd -54 -24))) ;; Not implemeted for non-negatives
+  (is (= 6 (m/gcd -54 24)))
+  (is (= 6 (m/gcd 54 -24)))
+  (is (thrown? IllegalArgumentException (m/gcd 1 "a")))
+  (is (thrown? IllegalArgumentException (m/gcd "a" 1)))
+  (is (thrown? IllegalArgumentException (m/gcd "a" "b"))))
+
+(deftest lcm-test
+  (is (= 42 (m/lcm 21 6)))
+  (is (= 42 (m/lcm -21 6)))
+  (is (= 42 (m/lcm 21 -6)))
+  (is (= 42 (m/lcm -21 -6))))
 
 (run-tests)
 

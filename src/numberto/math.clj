@@ -1,7 +1,6 @@
 (ns numberto.math
   (:require [numberto.validator :as v]))
 
-;; TODO [ENHANCEMENT] return needed number of digits
 (def PI Math/PI)
 (def E Math/E)
 
@@ -31,13 +30,6 @@
   (v/validate x :number :non-negative)
   (Math/sqrt x))
 
-;; TODO [ENHANCEMENT] replace Math/sqrt as it returns double
-;; TODO [ENHANCEMENT] newton algorithm
-;; TODO [IMPL] implement sqroot-int
-
-;; TODO [TEST] cover with tests
-;; TODO [IMPL] extend for bignumbers
-
 (defn square? [n]
   "test whether number is exact square or no"
   (= n (square (int (sqroot n)))))
@@ -61,13 +53,15 @@
   "multiplies all elements in collection"
   (reduce *' coll))
 
-;; TODO [TEST] cover
-;; TODO [IMPL] Error handling
 (defn gcd [a b]
   "greatest common divisor. Euclidean algorithm"
-  (if (zero? b) a
-      (recur b (mod a b))))
+  (v/validate a :integer)
+  (v/validate b :integer)
+  (loop [a* (abs a) b* (abs b)]
+    (if (zero? b*) a*
+        (recur b* (mod a* b*)))))
 
 (defn lcm [a b]
   "least common multiple"
-  (/ (abs (*' a b)) (gcd a b)))
+  (let [g (gcd a b)]
+    (/ (abs (*' a b)) g)))
