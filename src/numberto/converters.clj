@@ -28,5 +28,3 @@
   (cond
    (every? digit? ds) (bigint (apply str ds))
    :else (throw (IllegalArgumentException. "digits must contain only numbers [0-9]"))))
-
-;; TODO [binary, hex, oct]
