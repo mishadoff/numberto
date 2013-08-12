@@ -1,6 +1,5 @@
 (ns numberto.predicates
   (:require [numberto.converters :as c])
-  (:require [numberto.primes :as p])
   (:require [numberto.math :as m]))
 
 (defn digit? [d]

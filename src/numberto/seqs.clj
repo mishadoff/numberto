@@ -17,6 +17,11 @@
 ;; Triangle numbers
 (def triangles (reductions + naturals))
 
-;; TODO pentagonal sequence
-;; TODO hexagonal sequence
-;; TODO collatz sequence
+;; Prime numbers
+(defn primes []
+  "Lazy sequence of prime numbers"
+  (letfn [(next-prime [p ps]
+            (cond (some #(zero? (mod p %)) (take-while #(<= (* % %) p) ps))
+                  (recur (+ p 2) ps)
+                  :else (cons p (lazy-seq (next-prime (+ p 2) (conj ps p))))))]
+    (cons 2 (lazy-seq (next-prime 3 [])))))

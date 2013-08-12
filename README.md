@@ -27,6 +27,7 @@ All you need to play with numbers
 	* `product`
 	* `gcd`
 	* `lcm`
+	* `factorize`
 * **numberto.converters**
     * `char->digit`
     * `digit->char`
@@ -38,9 +39,12 @@ All you need to play with numbers
 	* `square?`
 	* `permutation?`
 	* `prime?`
-* **numberto.primes**
-    * `primes`
-    * `factorize`
 * **numberto.factorial**
 	* `!`
 	* `!!`
+* **numberto.seqs**
+	* `naturals`
+	* `squares`
+	* `powers-of-two`
+	* `triangles`
+	* `primes`
