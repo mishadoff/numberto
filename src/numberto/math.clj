@@ -1,7 +1,6 @@
 (ns numberto.math
   (:require [numberto.validator :as v])
-  (:require [numberto.converters :as c])
-  (:require [numberto.seqs :as s]))
+  (:require [numberto.converters :as c]))
 
 (def PI Math/PI)
 (def E Math/E)
@@ -93,11 +92,3 @@
   "least common multiple"
   (let [g (gcd a b)]
     (/ (abs (*' a b)) g)))
-
-(defn factorize [n]
-  "factorize number to prime muliplies"
-  (v/validate n :integer #(> % 1))
-  (loop [x n fact []]
-    (if (= 1 x) fact
-        (let [d (first (drop-while #(not (zero? (rem x %))) (s/primes)))]
-          (recur (/ x d) (conj fact d))))))

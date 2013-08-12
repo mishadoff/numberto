@@ -106,13 +106,3 @@
   (is (= 42 (m/lcm -21 6)))
   (is (= 42 (m/lcm 21 -6)))
   (is (= 42 (m/lcm -21 -6))))
-
-(deftest factorize-test
-  (is (= [2 5] (m/factorize 10)))
-  (is (= [104743] (m/factorize 104743)))
-  (is (= [2 2 2 2 2 2 2 2] (m/factorize 256)))
-  (is (thrown? IllegalArgumentException (m/factorize 0)))
-  (is (thrown? IllegalArgumentException (m/factorize 1)))
-  (is (thrown? IllegalArgumentException (m/factorize 1.0)))
-  (is (thrown? IllegalArgumentException (m/factorize -120)))
-  (is (thrown? IllegalArgumentException (m/factorize "a"))))

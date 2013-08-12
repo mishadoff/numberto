@@ -1,5 +1,5 @@
 (ns numberto.factorial
-  (:require [numberto.primes :as p])
+  (:require [numberto.seqs :as s])
   (:require [numberto.validator :as v])
   (:require [numberto.math :as m]))
 
@@ -22,6 +22,6 @@
   "Improved version of factorial by factorization"
   (loop [[h & t] 
          (map #(m/power* % (find-power n %))
-              (take-while #(<= % n) (p/primes)))
+              (take-while #(<= % n) (s/primes)))
          acc 1]
     (if h (recur t (*' h acc)) acc)))
