@@ -13,5 +13,3 @@
     (is (thrown? IllegalArgumentException (! "hello")))
     (is (thrown? IllegalArgumentException (! 1.0)))))
 
-(run-tests)
-

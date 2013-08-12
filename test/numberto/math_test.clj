@@ -116,6 +116,3 @@
   (is (thrown? IllegalArgumentException (m/factorize 1.0)))
   (is (thrown? IllegalArgumentException (m/factorize -120)))
   (is (thrown? IllegalArgumentException (m/factorize "a"))))
-
-(run-tests)
-

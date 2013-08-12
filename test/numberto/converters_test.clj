@@ -24,17 +24,3 @@
   (is (= 1223445 ) (c/digits->num [1 2 2 3 4 4 5]))
   (is (thrown? IllegalArgumentException (c/digits->num [1 2 "3"])))
   (is (thrown? IllegalArgumentException (c/digits->num ["99N"]))))
-   
-(run-tests)
-
-
-
-
-
-
-
-
-
-
-
-

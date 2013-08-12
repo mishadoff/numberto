@@ -48,3 +48,6 @@ All you need to play with numbers
 	* `powers-of-two`
 	* `triangles`
 	* `primes`
+	* `fibonacci`
+	* `continued-fraction-sqroot`
+	* `farey`

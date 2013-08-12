@@ -24,9 +24,6 @@
   (is (false? (p/permutation? 22111 11121)))
   (is (p/permutation? 9999 9999)))
 
-(run-tests)
-
-
 
 
 
