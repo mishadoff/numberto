@@ -2,6 +2,8 @@
 
 All you need to play with numbers
 
+![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)
+
 ### Usage Example
 
 [ TODO ]
@@ -27,7 +29,6 @@ All you need to play with numbers
 	* `product`
 	* `gcd`
 	* `lcm`
-	* `factorize`
 * **numberto.converters**
     * `char->digit`
     * `digit->char`

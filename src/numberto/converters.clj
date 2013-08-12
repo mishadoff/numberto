@@ -7,7 +7,7 @@
 
 (defn char->digit [c]
   "cast char to digit"
-  (let [n (- (int c) 48)]
+  (let [n (- (int c) 49)]
     (cond 
      (digit? n) n
      :else (throw (IllegalArgumentException. "char must be a convertable number")))))
