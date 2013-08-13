@@ -5,12 +5,16 @@
 (def PI Math/PI)
 (def E Math/E)
 
-(declare sum)
+(defn sum [coll]
+  "sum all elements in a collection"
+  (reduce +' coll))
 
 (defn count-digits [num]
+  "find count of digits in a number"
   (count (c/num->digits num)))
 
 (defn sum-of-digits [num]
+  "find sum of number digits"
   (sum (c/num->digits num)))
 
 (defn reverse-num [num]
@@ -60,10 +64,6 @@
 (defn square? [n]
   "test whether number is exact square or no"
   (= n (square (int (sqroot n)))))
-
-(defn sum [coll]
-  "sum all elements in a collection"
-  (reduce +' coll))
 
 (defn abs [x]
   "return absolute value of x"

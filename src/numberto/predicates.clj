@@ -6,9 +6,11 @@
   (c/digit? d))
 
 (defn palindrome? [num]
+  "test whether number is a palindrome"
   (= num (m/reverse-num num)))
 
 (defn square? [n]
+  "test whether number is square"
   (m/square? n))
 
 (defn permutation? [num1 num2]
@@ -17,7 +19,7 @@
     (= (f num1) (f num2))))
 
 (defn prime? [p]
-  "check whether number is prime. Complexity O(sqrt(p))"
+  "test whether number is prime. Complexity O(sqrt(p))"
   (and (> p 1)
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))
