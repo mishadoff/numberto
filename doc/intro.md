@@ -3,7 +3,7 @@
 Lein dependency
 
 ```
-[mishadoff/numberto "0.0.1"]
+[numberto "0.0.1"]
 ```
 
 ### Converters
