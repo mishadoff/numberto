@@ -2,53 +2,22 @@
 
 All you need to play with numbers
 
+[mishadoff/numberto "0.0.1"]
+
 ![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)
 
-### Usage Example
+Latest version: **0.0.1**
 
-[ TODO ]
+[Changelog](https://github.com/mishadoff/numberto/blob/master/doc/changelog.md)
 
-### Full Reference
+### Rationale
 
-* **numberto.math**
-    * `PI`
-    * `E`
-	* `count-digits`
-	* `sum-of-digits`
-	* `reverse-num`
-	* `shift-left`
-	* `shift-right`
-	* `permutation?`
-    * `power`
-    * `power*`
-    * `square`
-    * `sqroot`
-	* `sum`
-	* `abs`
-	* `avg`
-	* `product`
-	* `gcd`
-	* `lcm`
-* **numberto.converters**
-    * `char->digit`
-    * `digit->char`
-    * `num->digits`
-    * `digits->num`
-* **numberto.predicates**
-    * `digit?`
-	* `palindrome?`
-	* `square?`
-	* `permutation?`
-	* `prime?`
-* **numberto.factorial**
-	* `!`
-	* `!!`
-* **numberto.seqs**
-	* `naturals`
-	* `squares`
-	* `powers-of-two`
-	* `triangles`
-	* `primes`
-	* `fibonacci`
-	* `continued-fraction-sqroot`
-	* `farey`
+The purpose of this library to provide set of mathematical abstractions over numbers to simplify number-based experiments.
+
+Suggestions and improvements are welcome! 
+
+[Getting Started](https://github.com/mishadoff/numberto/blob/master/doc/intro.md)
+
+### License
+
+Distributed under the Eclipse Public License, the same as Clojure.
