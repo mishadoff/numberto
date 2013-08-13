@@ -2,7 +2,7 @@
 
 All you need to play with numbers
 
-[mishadoff/numberto "0.0.1"]
+`[mishadoff/numberto "0.0.1"]`
 
 ![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)
 

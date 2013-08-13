@@ -106,7 +106,7 @@ What about factorial?
 
 There is also a factorial version `!!` optimized for big numbers.
 
-```
+``` clojure
 (time (! 100000))
 ;; "Elapsed time: 21052.309721 msecs"
 (time (!! 100000))
