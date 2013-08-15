@@ -11,8 +11,8 @@
         (recur (dec cur) (*' cur acc)))))
 
 (defn !! [n]
-  (v/validate n :integer :non-negative)
   "Improved version of factorial by factorization. Works better for large numbers."
+  (v/validate n :integer :non-negative)
   (letfn [(find-power [n k]
             (loop [total n sum 0]
               (let [i (int (/ total k))]
@@ -23,3 +23,10 @@
                 (take-while #(<= % n) (s/primes)))
            acc 1]
       (if h (recur t (*' h acc)) acc))))
+
+;; DOES NOT WORK FOR LARGE NUMBERS
+(defn stirling-approximation [n]
+  "Stirling approximation of factorial. O(log(n))"
+  (v/validate n :number)
+  (* (m/power* (bigdec (/ n m/E)) n)
+     (bigdec (m/sqroot (* 2 m/PI n)))))

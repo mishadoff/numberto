@@ -24,3 +24,24 @@
   (is (= 1223445 ) (c/digits->num [1 2 2 3 4 4 5]))
   (is (thrown? IllegalArgumentException (c/digits->num [1 2 "3"])))
   (is (thrown? IllegalArgumentException (c/digits->num ["99N"]))))
+
+(deftest number->roman-test
+  (is (= "CXXIII" (c/number->roman 123))) 
+  (is (= "IX" (c/number->roman 9))) 
+  (is (= "MCMLXXXIX" (c/number->roman 1989)))
+  (is (thrown? IllegalArgumentException (c/number->roman 0)))
+  (is (thrown? IllegalArgumentException (c/number->roman -100)))
+  (is (thrown? IllegalArgumentException (c/number->roman 1.0))))
+
+(deftest roman->number-test
+  (is (= 123 (c/roman->number "CXXIII")))
+  (is (= 9 (c/roman->number "IX"))) 
+  (is (= 1989 (c/roman->number "MCMLXXXIX")))
+  (is (thrown? IllegalArgumentException (c/roman->number "iii")))
+  (is (thrown? IllegalArgumentException (c/roman->number "0"))))
+
+(deftest roman-invariant-test
+  (doseq [i (range 1 2000)]
+    (is (= i (c/roman->number (c/number->roman i))))))
+          
+
