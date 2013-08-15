@@ -43,5 +43,9 @@
 (deftest roman-invariant-test
   (doseq [i (range 1 2000)]
     (is (= i (c/roman->number (c/number->roman i))))))
-          
 
+(deftest decimal->ratio-test
+  (is (= 6283/2000 (c/decimal->ratio 3.1415)))
+  (is (= 1 (c/decimal->ratio 1)))
+  (is (= 1/8 (c/decimal->ratio 0.125)))
+  (is (thrown? IllegalArgumentException (c/decimal->ratio "a"))))
