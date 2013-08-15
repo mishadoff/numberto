@@ -63,13 +63,3 @@
          (partition-by identity)
          (map (partial reduce +))
          (reduce sum))))
-
-;; Fractions
-
-(defn decimal->ratio [d]
-  "Convert decimal number to ratio or integer if possible"
-  (v/validate d :number)
-  (loop [r (.stripTrailingZeros (bigdec d)) n 1N]
-    (if (= r (.setScale r 0 BigDecimal/ROUND_UP)) (/ (bigint r) n) 
-      (recur (.stripTrailingZeros (* 10 r)) (* 10 n)))))
-  
