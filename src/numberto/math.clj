@@ -21,6 +21,10 @@
   "reverses a number"
   (c/digits->num (reverse (c/num->digits num))))
 
+(defn shuffle-num [num]
+  "shuffle a number"
+  (c/digits->num (shuffle (c/num->digits num))))
+
 (defn shift-left [num cnt]
   "shift number digits to the left by specified amount of shifts.
    Number of shifts can be greater than the size of number."

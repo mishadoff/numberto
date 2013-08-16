@@ -27,6 +27,12 @@
   (is (thrown? IllegalArgumentException (m/reverse-num "123")))
   (is (thrown? IllegalArgumentException (m/reverse-num [1]))))
 
+(deftest shuffle-num-test
+  (is (= 3 (m/count-digits (m/shuffle-num 345))))
+  (is (= 7 (m/count-digits (m/shuffle-num 1254562))))
+  (let [n 34567235467228362375687352365472364162352467648723658723469182]
+    (is (m/permutation? n (m/shuffle-num n)))))
+
 (deftest shift-left-test
   (is (= 123 (m/shift-left 231 2)))
   (is (= 123 (m/shift-left 123 0)))
