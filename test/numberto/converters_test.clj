@@ -2,6 +2,13 @@
   (:use [clojure.test])
   (:require [numberto.converters :as c]))
 
+(deftest digit?-test
+  (is (every? c/digit? [0 1 2 3 4 5 6 7 8 9]))
+  (is (every? (comp not c/digit?) [11 23 324 123 43 123 87 129 143 12223]))
+  (is (false? (c/digit? 12)))
+  (is (false? (c/digit? "Hello")))
+  (is (false? (c/digit? [1]))))
+
 (deftest char->digit-test
   (is (= [0 1 2 3 4 5 6 7 8 9]
          (map c/char->digit "0123456789")))

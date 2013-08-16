@@ -106,3 +106,20 @@
   (is (= 42 (m/lcm -21 6)))
   (is (= 42 (m/lcm 21 -6)))
   (is (= 42 (m/lcm -21 -6))))
+
+;; Predicates test
+
+(deftest square?-test
+  (is (every? m/square? [0 1 4 9 16 225]))
+  (is (every? (comp not m/square?) [11 23 325 123 43 123 87 129 143 12223]))
+  (is (false? (m/square? 1025))))
+
+(deftest palindrome?-test
+  (is (m/palindrome? 123454321))
+  (is (false? (m/palindrome? 1025))))
+
+(deftest permutation?-test
+  (is (m/permutation? 1232352 2335221))
+  (is (false? (m/permutation? 1232352 2235221)))
+  (is (false? (m/permutation? 22111 11121)))
+  (is (m/permutation? 9999 9999)))

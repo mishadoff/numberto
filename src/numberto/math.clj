@@ -61,10 +61,6 @@
   (v/validate x :number :non-negative)
   (Math/sqrt x))
 
-(defn square? [n]
-  "test whether number is exact square or no"
-  (= n (square (int (sqroot n)))))
-
 (defn abs [x]
   "return absolute value of x"
   (v/validate x :number)
@@ -92,3 +88,18 @@
   "least common multiple"
   (let [g (gcd a b)]
     (/ (abs (*' a b)) g)))
+
+;; Predicates
+
+(defn square? [n]
+  "test whether number is exact square or no"
+  (= n (square (int (sqroot n)))))
+
+(defn palindrome? [num]
+  "test whether number is a palindrome"
+  (= num (reverse-num num)))
+
+(defn permutation? [num1 num2]
+  "test whether two numbers are permutations of each other' digits"
+  (let [f (comp frequencies c/num->digits)]
+    (= (f num1) (f num2))))

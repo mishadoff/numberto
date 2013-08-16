@@ -1,7 +1,7 @@
 (ns numberto.primes
-  (:require [numberto.validator :as v]))
+  (:require [numberto.validator :as v])
+  (:require [numberto.math :as m]))
 
-;; Prime numbers
 (defn primes []
   "Lazy sequence of prime numbers"
   (letfn [(next-prime [p ps]
@@ -9,6 +9,19 @@
                   (recur (+ p 2) ps)
                   :else (cons p (lazy-seq (next-prime (+ p 2) (conj ps p))))))]
     (cons 2 (lazy-seq (next-prime 3 [])))))
+
+;; More prime numbers testing
+(defn prime? [p]
+  "test whether number is prime. Complexity O(sqrt(p))"
+  (and (> p 1)
+       (not (some #(zero? (mod p %))
+                  (take-while #(<= (* % %) p) (range 2 p))))))
+
+(defn mersenne-primes []
+  "Lazy sequence of mersenne primes: 2^p - 1"
+  (letfn [(mersenne-fn [p]
+            (dec (m/power* 2 p)))]
+    (filter prime? (map mersenne-fn (primes)))))
 
 (defn factorize [n]
   "factorize number to prime muliplies"

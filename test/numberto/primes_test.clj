@@ -7,6 +7,13 @@
   (is (= 13 (nth (p/primes) 5)))
   (is (= 104743 (nth (p/primes) 10000))))
 
+(deftest prime?-test
+  (is (p/prime? 2))
+  (is (every? p/prime? (take 100 (p/primes))))
+  (is (p/prime? 104743))
+  (is (false? (p/prime? 1)))
+  (is (false? (p/prime? -100)))
+  (is (false? (p/prime? 666666))))
 
 (deftest factorize-test
   (is (= [2 5] (p/factorize 10)))
