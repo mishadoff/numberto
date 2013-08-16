@@ -23,3 +23,13 @@ Features to be added
 Fast calculation approximate value of factorial
 
 [TODO] implement
+
+# Prime Numbers
+
+Lazy sequence `primes` moved from `seqs.clj` to `primes.clj`
+
+You can easily factorize your number to prime multipliers
+
+``` clojure
+(factorize 234) => [2 3 3 13]
+```

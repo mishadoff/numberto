@@ -14,15 +14,6 @@
 ;; Triangle numbers [1 3 6 10 15 ...]
 (def triangles (reductions + naturals))
 
-;; Prime numbers
-(defn primes []
-  "Lazy sequence of prime numbers"
-  (letfn [(next-prime [p ps]
-            (cond (some #(zero? (mod p %)) (take-while #(<= (* % %) p) ps))
-                  (recur (+ p 2) ps)
-                  :else (cons p (lazy-seq (next-prime (+ p 2) (conj ps p))))))]
-    (cons 2 (lazy-seq (next-prime 3 [])))))
-
 ;; Fibonacci [1 1 2 3 5 8 13 ... ]
 (def fibonacci
   "Generate fibonacci sequence"

@@ -14,11 +14,6 @@
 (deftest triangles-test
   (is (= [1 3 6 10 15] (take 5 s/triangles))))
 
-(deftest primes-test
-  (is (= 2 (first (s/primes))))
-  (is (= 13 (nth (s/primes) 5)))
-  (is (= 104743 (nth (s/primes) 10000))))
-
 (deftest fibonacci-test
   (is (= [1 1 2 3 5 8 13 21 34 55] (take 10 s/fibonacci))))
 

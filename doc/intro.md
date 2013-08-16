@@ -127,7 +127,6 @@ Lazy sequences are good composable objects. Always cut results before output.
 And your favorite
 
 ``` clojure
-(take 10 (primes)) => (2 3 5 7 11 13 17 19 23 29)
 (take 10 fibonacci) => (1 1 2 3 5 8 13 21 34 55)
 ```
 
@@ -136,6 +135,14 @@ Some are not very popular
 ``` clojure
 (take 10 (continued-fraction-sqroot 3)) => (1 1 2 1 2 1 2 1 2 1)
 (take 10 (farey 5)) => ([0 1] [1 5] [1 4] [1 3] [2 5] [1 2] [3 5] [2 3] [3 4] [4 5])
+```
+
+### Primes
+
+Primes namespaces provide a bunch of functions related to prime numbers
+
+``` clojure
+(take 10 (primes)) => (2 3 5 7 11 13 17 19 23 29)
 ```
 
 **Note:** Almost all number functions assuming bigint, and not optimized for areas where performace is critical.
