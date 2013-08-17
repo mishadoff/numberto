@@ -17,12 +17,6 @@
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))
 
-(defn mersenne-primes []
-  "Lazy sequence of mersenne primes: 2^p - 1"
-  (letfn [(mersenne-fn [p]
-            (dec (m/power* 2 p)))]
-    (filter prime? (map mersenne-fn (primes)))))
-
 (defn factorize [n]
   "factorize number to prime muliplies"
   (v/validate n :integer #(> % 1))

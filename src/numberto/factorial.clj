@@ -11,7 +11,8 @@
         (recur (dec cur) (*' cur acc)))))
 
 (defn !! [n]
-  "Improved version of factorial by factorization. Works better for large numbers."
+  "Improved version of factorial by factorization. 
+   Works better for large numbers."
   (v/validate n :integer :non-negative)
   (letfn [(find-power [n k]
             (loop [total n sum 0]
