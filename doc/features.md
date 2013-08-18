@@ -2,6 +2,8 @@ Features to be added
 
 # Printers [NEW]
 
+`(:use [numberto.printers])`
+
 ### Long numbers
 
 If you have a *really* big number, printing it to `System.out` not a good idea.
@@ -12,13 +14,13 @@ If you have a *really* big number, printing it to `System.out` not a good idea.
 ```
 
 It prints 5 first digits, 5 last digits and a number of digits between. By the way
-it is configurable.
+it is configurable. You can pass a map with properties you want to override.
 
 ``` clojure
 (format-num 27647234687347823658723657823 {:s 1 :e 1 :cnt false}) => "2...3"
 ```
 
-Have a problem to read long number? Use following method:
+Have a problem to read long number? Use the following method:
 
 ``` clojure
 (number-name 16532561257523723757234781264) =>
@@ -26,13 +28,6 @@ Have a problem to read long number? Use following method:
 two hundred fifty seven quintillion five hundred twenty three quadrillion seven hundred
 twenty three trillion seven hundred fifty seven billion two hundred thirty four million
 seven hundred eighty one thousand two hundred sixty four"
-```
-
-Though we have `format-num` function that captures some number properties, you
-might want to select `what` properties are important for you:
-
-``` clojure
-(what 235390) => {:number 235390, :count-of-digits 6, :sum-of-digits 22}
 ```
 
 # Converters
@@ -71,6 +66,8 @@ To test whether number prime or not you have standard `prime?` predicate,
 works in O(sqrt(n)) time. Another primality tests are [TODO]
 
 # Generators [NEW]
+
+`(:use [numberto.generators])`
 
 So, you want a random digit?
 

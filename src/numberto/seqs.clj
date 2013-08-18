@@ -45,3 +45,6 @@
                 (cons next-term (lazy-seq (next-farey r2 next-term))))))]
     (let [a 0 b 1 c 1 d n]
       (concat [[a b] [c d]] (lazy-seq (next-farey [a b] [c d]))))))
+
+;; (defn palindromes []
+;;   (let []) )

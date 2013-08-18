@@ -4,16 +4,14 @@
   (:require [numberto.math :as m]))
 
 (def default-properties 
-  {:s 5
-   :e 5
-   :cnt true})
+  {:s 5 :e 5 :cnt true})
 
 (defn format-num
   "Print long number in short format"
   ([num] (format-num num default-properties))
   ([num props]
-     (v/validate num :integer)
-     (let [{s :s e :e cnt :cnt} props
+     (v/validate num :integer :non-negative)
+     (let [{s :s e :e cnt :cnt} (merge default-properties props)
            num-seq (c/num->digits num) n (count num-seq)]
        (if (< (+ s e) n)
          (str (apply str (take s num-seq))
@@ -77,12 +75,3 @@
          (remove nil?)
          (interpose " ")
          (apply str))))
-
-(defn what [num]
-  "Extract some useful number properties"
-  (v/validate num :integer)
-  {:number num
-   :count-of-digits (m/count-digits num)
-   :sum-of-digits (m/sum-of-digits num)
-   }
-  )
