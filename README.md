@@ -1,12 +1,8 @@
-# numberto
+# numberto ![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)
 
 All you need to play with numbers
 
 `[numberto "0.0.1"]`
-
-![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)
-
-Latest version: **0.0.1**
 
 [Changelog](https://github.com/mishadoff/numberto/blob/master/doc/changelog.md)
 
