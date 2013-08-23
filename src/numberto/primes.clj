@@ -24,3 +24,7 @@
     (if (= 1 x) fact
         (let [d (first (drop-while #(not (zero? (rem x %))) (primes)))]
           (recur (/ x d) (conj fact d))))))
+
+(defn totient [n]
+  "Euler's totient function"
+  (reduce * n (map #(- 1 (/ 1 %)) (distinct (factorize n)))))

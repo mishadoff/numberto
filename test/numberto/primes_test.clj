@@ -24,3 +24,10 @@
   (is (thrown? IllegalArgumentException (p/factorize 1.0)))
   (is (thrown? IllegalArgumentException (p/factorize -120)))
   (is (thrown? IllegalArgumentException (p/factorize "a"))))
+
+(deftest totient-test
+  (is (= 12 (p/totient 36)))
+  (is (= 96 (p/totient 97)))
+  (doseq [i (take 100 (p/primes))]
+    (is (= (dec i) (p/totient i))))
+  (is (thrown? IllegalArgumentException (p/totient 0))))
