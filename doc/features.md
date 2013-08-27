@@ -91,3 +91,22 @@ Shuffle a number
 ```
 (shuffle 123523) => 252331
 ```
+
+# Seqs
+
+Palindromic sequence. Instead of iterating all numbers and filter out
+palindromic ones, we generate sorted palindromic sequence. Lazy.
+
+For example 10000th palindrome
+
+``` clojure
+(time (last (take 10000 (palindromes)))) 
+;; "Elapsed time: 82.214392 msecs"
+```
+
+Naive approach much slower
+
+``` clojure
+(time (last (take 10000 (filter palindrome? (range)))))
+;; "Elapsed time: 8065.947083 msecs"
+```

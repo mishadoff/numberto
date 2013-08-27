@@ -1,6 +1,7 @@
 (ns numberto.seqs
   (:require [numberto.math :as m])
-  (:require [numberto.validator :as v]))
+  (:require [numberto.validator :as v])
+  (:require [numberto.converters :as c]))
 
 ;; Natural numbers [1 2 3 ...]
 (def naturals (iterate (partial +' 1) 1))
@@ -46,5 +47,17 @@
     (let [a 0 b 1 c 1 d n]
       (concat [[a b] [c d]] (lazy-seq (next-farey [a b] [c d]))))))
 
-;; (defn palindromes []
-;;   (let []) )
+(defn palindromes []
+  "Returns sorted lazy sequence of palindromic numbers."
+  (let [s (atom 1)
+        pal (fn [n f]
+              (let [ds (c/num->digits n)]
+                (c/digits->num (concat ds (f (reverse ds))))))
+        next-pal (fn [[n v]]
+                   (if (> (m/count-digits (inc v)) @s)
+                     (do
+                       (swap! s inc)
+                       (let [newn (m/product (repeat (quot (dec @s) 2) 10))]
+                         [newn (pal newn (if (even? @s) identity rest))]))
+                     [(inc n) (pal (inc n) (if (even? @s) identity rest))]))]
+    (map second (iterate next-pal [0N 0N]))))
