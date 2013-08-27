@@ -36,5 +36,5 @@
 (deftest palindromes-test
   (is (= [0 1 2 3 4 5 6 7 8 9 11]
          (take 11 (s/palindromes))))
-  (is (= 63836 (last (take 737 (s/palindromes)))))
+  (is (= 63736 (last (take 737 (s/palindromes)))))
   (is (= 9001009 (last (take 10001 (s/palindromes))))))
