@@ -25,12 +25,4 @@
            acc 1]
       (if h (recur t (*' h acc)) acc))))
 
-;; DOES NOT WORK FOR LARGE NUMBERS
-;; (defn stirling-approximation [n]
-;;   "Stirling approximation of factorial. O(log(n))"
-;;   (v/validate n :number)
-;;   (let [^BigDecimal a (bigdec (/ n Math/E))]
-;;     (* (.pow a n (java.math.MathContext. 256))
-;;        (bigdec (m/sqroot (* 2 m/PI n))))))
-
 
