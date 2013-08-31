@@ -1,5 +1,15 @@
 # Changelog
 
+### 0.0.2
+
+* New namespace `printers` which allow to print long numbers
+* Number to name conversion
+* Roman numbers converter
+* Separate namespace `primes`. Functions `factorize` and `totient`
+* New namespace `generators`
+* `shuffle` number
+* Fast palindromes sequence 
+
 ### 0.0.1
 
 Initial release.
