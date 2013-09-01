@@ -58,7 +58,7 @@ Math namespace provides functions to perform number manipulations
 (reverse-num 123456789) => 987654321
 (shift-left 123456789 3) => 456789123
 (shift-right 123456789 3) => 789123456
-(shuffle 123523) => 252331
+(shuffle-num 123523) => 252331
 ```
 
 Some math functions included as well, like exponentiation
