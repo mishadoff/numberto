@@ -31,3 +31,23 @@
   (doseq [i (take 100 (p/primes))]
     (is (= (dec i) (p/totient i))))
   (is (thrown? IllegalArgumentException (p/totient 0))))
+
+(deftest sum-of-proper-divisors-test
+  (is (= 8 (p/sum-of-proper-divisors 10)))
+  (is (= 284 (p/sum-of-proper-divisors 220)))
+  (is (= 220 (p/sum-of-proper-divisors 284)))
+  (is (thrown? IllegalArgumentException (p/sum-of-proper-divisors -10)))
+  (is (thrown? IllegalArgumentException (p/sum-of-proper-divisors 1.0)))
+  (is (thrown? IllegalArgumentException (p/sum-of-proper-divisors "a")))
+  (is (thrown? IllegalArgumentException (p/sum-of-proper-divisors 0)))
+  (is (thrown? IllegalArgumentException (p/sum-of-proper-divisors 1))))
+
+(deftest amicable?-test
+  (is (p/amicable? 220 284))
+  (is (false? (p/amicable? 6 6)))
+  (is (false? (p/amicable? 10 20))))
+
+(deftest perfect?-test
+  (is (p/perfect? 6))
+  (is (false? (p/perfect? 7)))
+  (is (false? (p/perfect? 8))))

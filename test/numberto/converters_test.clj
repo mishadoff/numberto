@@ -44,8 +44,10 @@
   (is (= 123 (c/roman->number "CXXIII")))
   (is (= 9 (c/roman->number "IX"))) 
   (is (= 1989 (c/roman->number "MCMLXXXIX")))
-  (is (thrown? IllegalArgumentException (c/roman->number "iii")))
-  (is (thrown? IllegalArgumentException (c/roman->number "0"))))
+  (is (= 3 (c/roman->number "iii")))
+  (is (= 37 (c/roman->number "xxxVIi")))
+  (is (thrown? IllegalArgumentException (c/roman->number "0")))
+  (is (thrown? IllegalArgumentException (c/roman->number "WOW"))))
 
 (deftest roman-invariant-test
   (doseq [i (range 1 2000)]

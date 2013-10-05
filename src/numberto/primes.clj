@@ -28,3 +28,17 @@
 (defn totient [n]
   "Euler's totient function"
   (reduce * n (map #(- 1 (/ 1 %)) (distinct (factorize n)))))
+
+(defn sum-of-proper-divisors [n]
+  "Sum of proper divisors. d(10) = (+ 1 2 5)"
+  (v/validate n :integer #(> % 1))
+  (let [base (filter #(zero? (mod n %)) (range 2 (Math/sqrt n)))]
+    (reduce + 1 (concat (map #(/ n %) base) base))))
+
+(defn amicable? [a b]
+  (and (not (= a b))
+       (= a (sum-of-proper-divisors b))
+       (= b (sum-of-proper-divisors a))))
+
+(defn perfect? [a]
+  (= a (sum-of-proper-divisors a)))

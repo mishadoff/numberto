@@ -201,7 +201,7 @@ twenty three trillion seven hundred fifty seven billion two hundred thirty four 
 seven hundred eighty one thousand two hundred sixty four"
 ```
 
-# Generators
+### Generators
 
 `(:use [numberto.generators])`
 
