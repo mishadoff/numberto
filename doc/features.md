@@ -6,3 +6,7 @@ Features to be added
   - `perfect?`
 * Converters
   - Improved `roman->number`
+  - Function `radix-convert` between different bases. Only integers
+* TODO Analysis [Experimental]
+  - `(what 1325)`
+* Number properties

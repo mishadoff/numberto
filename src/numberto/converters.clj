@@ -61,3 +61,19 @@
          (partition-by identity)
          (map (partial reduce +))
          (reduce #(if (< %1 %2) (+ %1 %2) (- %1 %2))))))
+
+(defn radix-convert [num from-radix to-radix]
+  "Convert num in string format in base of from-radix to to-radix.
+  Only small integers supported."
+  (v/validate from-radix :integer 
+              [#(<= 2 % 36) "must be in range [2..36]"])
+  (v/validate to-radix :integer 
+              [#(<= 2 % 36) "must be in range [2..36]"])
+  (v/validate num :string
+              [#(try (do (Integer/parseInt % from-radix) true)
+                     (catch NumberFormatException e false))
+               "must be in format of base [from-radix]"])
+  ;; validate num is valid in from
+  (-> num
+      (Integer/parseInt from-radix)
+      (Integer/toString to-radix)))

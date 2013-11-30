@@ -18,7 +18,7 @@
                   (take-while #(<= (* % %) p) (range 2 p))))))
 
 (defn factorize [n]
-  "factorize number to prime muliplies"
+  "factorize number to prime multiplies"
   (v/validate n :integer #(> % 1))
   (loop [x n fact []]
     (if (= 1 x) fact

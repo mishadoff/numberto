@@ -52,3 +52,15 @@
 (deftest roman-invariant-test
   (doseq [i (range 1 2000)]
     (is (= i (c/roman->number (c/number->roman i))))))
+
+(deftest radix-convert-test
+  (is (= "1001" (c/radix-convert "9" 10 2)))
+  (is (= "166" (c/radix-convert "166" 17 17)))
+  (is (= "255" (c/radix-convert "FF" 16 10)))
+  (is (thrown? IllegalArgumentException (c/radix-convert "hello" 15 10)))
+  (is (thrown? IllegalArgumentException (c/radix-convert "1020" 1 10)))
+  (is (thrown? IllegalArgumentException (c/radix-convert "1020" 10 39))))
+
+(deftest radix-convert-invariant-test
+  (doseq [radix (range 2 37)]
+    (is (= "1010" (c/radix-convert "1010" radix radix)))))
