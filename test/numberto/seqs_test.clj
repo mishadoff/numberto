@@ -14,6 +14,12 @@
 (deftest triangles-test
   (is (= [1 3 6 10 15] (take 5 s/triangles))))
 
+(deftest pentagonals-test
+  (is (= [1 5 12 22 35] (take 5 s/pentagonals))))
+
+(deftest hexagonals-test
+  (is (= [1 6 15 28 45] (take 5 s/hexagonals))))
+
 (deftest fibonacci-test
   (is (= [1 1 2 3 5 8 13 21 34 55] (take 10 s/fibonacci))))
 

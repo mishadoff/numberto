@@ -15,6 +15,12 @@
 ;; Triangle numbers [1 3 6 10 15 ...]
 (def triangles (reductions + naturals))
 
+;; Pentagonal numbers [1, 5, 12, 22 ...]
+(def pentagonals (map #(/ (- (* 3 (m/square %)) %) 2) naturals))
+
+;; Hexagonal number (property: every other triangle number)
+(def hexagonals (map #(/ (* 2 % (dec (* 2 %))) 2) naturals))
+
 ;; Fibonacci [1 1 2 3 5 8 13 ... ]
 (def fibonacci
   "Generate fibonacci sequence"

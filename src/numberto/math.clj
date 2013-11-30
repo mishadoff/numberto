@@ -17,6 +17,10 @@
   "find sum of number digits"
   (sum (c/num->digits num)))
 
+(defn sum-of-digits-recur [num]
+  "recursive sum of digits"
+  (if (c/digit? num) num (recur (sum-of-digits num))))
+
 (defn reverse-num [num]
   "reverses a number"
   (c/digits->num (reverse (c/num->digits num))))

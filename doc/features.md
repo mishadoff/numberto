@@ -7,6 +7,10 @@ Features to be added
 * Converters
   - Improved `roman->number`
   - Function `radix-convert` between different bases. Only integers
-* TODO Analysis [Experimental]
-  - `(what 1325)`
-* Number properties
+* Math
+  - `sum-of-digits-recur`
+* Generators
+  - `rand-bigint`
+* Sequences
+  - `pentagonals`
+  - `hexagonals`

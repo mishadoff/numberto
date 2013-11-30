@@ -63,4 +63,6 @@
 
 (deftest radix-convert-invariant-test
   (doseq [radix (range 2 37)]
-    (is (= "1010" (c/radix-convert "1010" radix radix)))))
+    (is (= "1010" (c/radix-convert "1010" radix radix)))
+    (is (= "101010101010" (c/radix-convert "101010101010" radix radix)))
+    ))
