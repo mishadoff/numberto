@@ -55,7 +55,7 @@
   (v/validate n :integer :non-negative)
   (letfn [(pow [x n acc] 
             (cond (= 0 n) acc
-                  (= 1 n) (* x acc)
+                  (= 1 n) (*' x acc)
                   (even? n) (recur (*' x x) (/ n 2) acc)
                   (odd? n) (recur (*' x x) (/ (dec n) 2) (*' x acc))))]
     (pow x n 1)))
