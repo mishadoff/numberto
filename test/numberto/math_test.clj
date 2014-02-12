@@ -113,6 +113,15 @@
   (is (= 42 (m/lcm 21 -6)))
   (is (= 42 (m/lcm -21 -6))))
 
+;; Lofarithms test
+
+(deftest log-test
+  (is (= 3 (bigint (m/log 2 8))))
+  (is (= 100 (bigint (m/log 2 (m/power* 2 100)))))
+  (is (= 100000 (bigint (m/log 2 (m/power* 2 100000)))))
+  (is (thrown? IllegalArgumentException (m/log 1 1000)))
+  (is (thrown? IllegalArgumentException (m/log 2 0))))
+
 ;; Predicates test
 
 (deftest square?-test

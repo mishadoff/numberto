@@ -9,6 +9,8 @@ Features to be added
   - Function `radix-convert` between different bases. Only integers
 * Math
   - `sum-of-digits-recur`
+  - `power*` avoid potential SO
+  - `log`, `log2` functions for bignums
 * Generators
   - `rand-bigint`
 * Sequences

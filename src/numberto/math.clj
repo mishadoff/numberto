@@ -97,6 +97,24 @@
   (let [g (gcd a b)]
     (/ (abs (*' a b)) g)))
 
+;; Logarithms
+
+(def ^:private LOG_LIMIT (reduce *' (repeat 1000 2)))
+
+(defn log [base n]
+  "log_base(n) for large numbers. Result may be inaccurate"
+  (v/validate n :number :positive)
+  (v/validate base :number #(> % 1))
+  (letfn [(log* [base n]
+            (if (<= n LOG_LIMIT) 
+              (/ (Math/log n)
+                 (Math/log base))
+              (+ (log* base (/ n LOG_LIMIT))
+                 (log* base LOG_LIMIT))))]
+    (log* base n)))
+
+(def log2 (partial log 2))
+
 ;; Predicates
 
 (defn square? [n]

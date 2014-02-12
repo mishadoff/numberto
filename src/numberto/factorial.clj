@@ -24,5 +24,3 @@
                 (take-while #(<= % n) (p/primes)))
            acc 1]
       (if h (recur t (*' h acc)) acc))))
-
-
