@@ -20,6 +20,19 @@
               (apply str (drop (- n e) num-seq)))
          (str num)))))
 
+(defn format-ratio [ratio limit]
+  "Print ratio number with limit accuracy"
+  ;; TODO validate ratio
+  ;; TODO tests
+  (let [numbers
+        (loop [n (numerator ratio) d (denominator ratio) it 0 res []]
+          (cond (= it limit) res
+                (= 0 n) res
+                (< n d) (recur (* 10 n) d (inc it) (conj res 0))
+                (>= n d) (recur (* 10 (mod n d)) d (inc it) (conj res (quot n d)))))]
+    (apply str (concat [(first numbers) "."] (rest numbers))))) 
+        
+
 (def number-names 
   {1 "one" 2 "two" 3 "three" 4 "four" 5 "five" 6 "six" 7 "seven"
    8 "eight" 9 "nine" 10 "ten" 11 "eleven" 12 "twelve" 13 "thirteen"
@@ -75,3 +88,4 @@
          (remove nil?)
          (interpose " ")
          (apply str))))
+  

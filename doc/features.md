@@ -16,3 +16,7 @@ Features to be added
 * Sequences
   - `pentagonals`
   - `hexagonals`
+* Printers
+  - `format-ratio` ;; TODOS
+* Irrational
+  - `e` calculation
