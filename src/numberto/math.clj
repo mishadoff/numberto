@@ -53,12 +53,12 @@
   "x to the nth power by squaring. O(log n)"
   (v/validate x :number)
   (v/validate n :integer :non-negative)
-  (letfn [(pow [x n] 
-            (cond (= 0 n) 1
-                  (= 1 n) x
-                  (even? n) (pow (*' x x) (/ n 2))
-                  (odd? n) (*' x (pow (*' x x) (/ (dec n) 2)))))]
-    (pow x n)))
+  (letfn [(pow [x n acc] 
+            (cond (= 0 n) acc
+                  (= 1 n) (* x acc)
+                  (even? n) (recur (*' x x) (/ n 2) acc)
+                  (odd? n) (recur (*' x x) (/ (dec n) 2) (*' x acc))))]
+    (pow x n 1)))
 
 (defn square [x]
   "x to the square"
