@@ -19,4 +19,4 @@ Features to be added
 * Printers
   - `format-ratio` ;; TODOS
 * Irrational
-  - `e` calculation
+  - `e`, `pi`, `sqrt n` calculations

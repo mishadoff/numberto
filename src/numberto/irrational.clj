@@ -1,5 +1,6 @@
 (ns numberto.irrational
   (:require [numberto.printers :as p])
+  (:require [numberto.math :as m])
   (:require [numberto.seqs :as s]))
 
 ;; "Gimme E, Gimme PI, Gimme that which I desire"
@@ -11,17 +12,21 @@
   (->> (range 1 (inc iterations))
        (reductions *')
        (map #(/ 1 %))
-       (reduce +')
-       (inc)
+       (reduce +' 1)
        (#(p/format-ratio % limit))))
 
-;; Archimedes method depends on sin and rough PI value
-;;;;  We can use taylor series for sin approximation 
-;; Ramanujan's method depends on sqrt(2) which is also irrational
-;; Arctan approximation slow and inaccurate
-
-(defn pi [] nil)
-
+(defn pi [& {:keys [iterations limit] 
+             :or {iterations 100 limit 16}}]
+  "Calculate PI by Rabinowitz algorithm"
+  (->> (range 1 (inc iterations))
+       (map #(/ (m/product (take %1 s/naturals))
+                (m/product (take %1 (filter odd? s/naturals)))))
+       (reduce +')
+       (* 2)
+       (dec)
+       (dec)
+       (#(p/format-ratio % limit))))
+       
 (defn sqrt [num & {:keys [iterations limit] 
                    :or {iterations 100 limit 16}}]
   "Calculate sqroot by continued fraction"
