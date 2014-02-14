@@ -49,6 +49,7 @@
   (v/validate n :integer :non-negative)
   (reduce *' (repeat n x)))
 
+;; What about bigdec (.pow)?
 (defn power* [x n]
   "x to the nth power by squaring. O(log n)"
   (v/validate x :number)

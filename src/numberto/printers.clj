@@ -33,7 +33,7 @@
     (apply str (concat [(first numbers) "."] (rest numbers))))) 
         
 
-(def number-names 
+(def ^:private number-names 
   {1 "one" 2 "two" 3 "three" 4 "four" 5 "five" 6 "six" 7 "seven"
    8 "eight" 9 "nine" 10 "ten" 11 "eleven" 12 "twelve" 13 "thirteen"
    14 "fourteen" 15 "fifteen" 16 "sixteen" 17 "seventeen" 18 "eighteen"
@@ -41,7 +41,7 @@
    60 "sixty" 70 "seventy" 80 "eighty" 90 "ninety" 100 "hundred"})
 
 ;; number means *3 zeros
-(def big-names
+(def ^:private big-names
   {1 "thousand" 2 "million" 3 "billion" 4 "trillion" 5 "quadrillion"
    6 "quintillion" 7 "sextillion" 8 "septillion" 9 "octillion"
    10 "ninillion" 11 "decillion" 12 "undecillion" 13 "duodecillion"

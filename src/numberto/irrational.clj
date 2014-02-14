@@ -1,5 +1,6 @@
 (ns numberto.irrational
-  (:require [numberto.printers :as p]))
+  (:require [numberto.printers :as p])
+  (:require [numberto.seqs :as s]))
 
 ;; "Gimme E, Gimme PI, Gimme that which I desire"
 ;; -- Metallica, Fuel
@@ -21,4 +22,11 @@
 
 (defn pi [] nil)
 
-(defn sqrt2 [] nil)
+(defn sqrt [num & {:keys [iterations limit] 
+                   :or {iterations 100 limit 16}}]
+  "Calculate sqroot by continued fraction"
+  (->> (s/continued-fraction-sqroot num)
+       (take iterations)
+       (reverse)
+       (reduce #(+ %2 (/ 1 %1)))
+       (#(p/format-ratio % limit))))
