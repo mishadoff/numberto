@@ -22,14 +22,17 @@
 
 (defn format-ratio [ratio limit]
   "Print ratio number with limit accuracy"
-  ;; TODO validate ratio
   ;; TODO tests
+  (v/validate ratio :number)
+  (v/validate limit :integer)
   (let [numbers
-        (loop [n (numerator ratio) d (denominator ratio) it 0 res []]
-          (cond (= it limit) res
-                (= 0 n) res
-                (< n d) (recur (* 10 n) d (inc it) (conj res 0))
-                (>= n d) (recur (* 10 (mod n d)) d (inc it) (conj res (quot n d)))))]
+        (if (ratio? ratio)
+          (loop [n (numerator ratio) d (denominator ratio) it 0 res []]
+            (cond (= it limit) res
+                  (= 0 n) res
+                  (< n d) (recur (* 10 n) d (inc it) (conj res 0))
+                  (>= n d) (recur (* 10 (mod n d)) d (inc it) (conj res (quot n d)))))
+          (cons ratio (repeat (dec limit) 0)))]
     (apply str (concat [(first numbers) "."] (rest numbers))))) 
         
 
