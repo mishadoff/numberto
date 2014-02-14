@@ -9,11 +9,11 @@
 ;; Square numbers [1 4 9 16 ...]
 (def squares (map #(* % %) naturals))
 
-;; Powers-of
-(defn powers-of [n] (iterate (partial *' n) 1))
-
-;; Powers of two [1 2 4 8 16 ...]
-(def powers-of-two (iterate (partial *' 2) 1))
+;; Powers-of n [1 n n^2 n^3 ...]
+(defn powers-of [n] 
+  (if (zero? n) 
+    (repeat 0)
+    (iterate (partial *' n) 1)))
 
 ;; Triangle numbers [1 3 6 10 15 ...]
 (def triangles (reductions + naturals))
@@ -70,3 +70,12 @@
                          [newn (pal newn (if (even? @s) identity rest))]))
                      [(inc n) (pal (inc n) (if (even? @s) identity rest))]))]
     (map second (iterate next-pal [0N 0N]))))
+
+(defn collatz [n]
+  "lazy collatz sequence"
+  (letfn [(next-conj [n]
+            (cons n 
+                  (cond (= n 1) '()
+                        (even? n) (lazy-seq (next-conj (/ n 2)))
+                        :else (lazy-seq (next-conj (inc (* 3 n)))))))]
+    (next-conj n)))

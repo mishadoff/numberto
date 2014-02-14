@@ -14,9 +14,10 @@ Features to be added
 * Generators
   - `rand-bigint`
 * Sequences
-  - `powers-of`
+  - `powers-of-two` generalized to `powers-of`
   - `pentagonals`
   - `hexagonals`
+  - `collatz`
 * Printers
   - `format-ratio` ;; TODOS
 * Irrational

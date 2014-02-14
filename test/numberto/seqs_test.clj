@@ -8,8 +8,12 @@
 (deftest squares-test
   (is (= [1 4 9 16 25] (take 5 s/squares))))
 
-(deftest powers-of-two-test
-  (is (= [1 2 4 8 16] (take 5 s/powers-of-two))))
+(deftest powers-of-test
+  (is (= [1 2 4 8 16] (take 5 (s/powers-of 2))))
+  (is (= [1 3 9 27 81] (take 5 (s/powers-of 3))))
+  (is (= [0 0 0] (take 3 (s/powers-of 0))))
+  (is (= [1 1 1] (take 3 (s/powers-of 1))))
+  (is (= [1 71 5041] (take 3 (s/powers-of 71)))))
 
 (deftest triangles-test
   (is (= [1 3 6 10 15] (take 5 s/triangles))))
@@ -44,3 +48,8 @@
          (take 11 (s/palindromes))))
   (is (= 63736 (last (take 737 (s/palindromes)))))
   (is (= 9001009 (last (take 10001 (s/palindromes))))))
+
+(deftest collatz-test
+  (is (= [5 16 8 4 2 1] (take 10 (s/collatz 5))))
+  (is (= (repeat 10000 1) 
+         (map (comp last s/collatz) (range 1 (inc 10000))))))
