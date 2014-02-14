@@ -9,6 +9,9 @@
 ;; Square numbers [1 4 9 16 ...]
 (def squares (map #(* % %) naturals))
 
+;; Powers-of
+(defn powers-of [n] (iterate (partial *' n) 1))
+
 ;; Powers of two [1 2 4 8 16 ...]
 (def powers-of-two (iterate (partial *' 2) 1))
 

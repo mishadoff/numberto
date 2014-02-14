@@ -14,6 +14,7 @@ Features to be added
 * Generators
   - `rand-bigint`
 * Sequences
+  - `powers-of`
   - `pentagonals`
   - `hexagonals`
 * Printers
