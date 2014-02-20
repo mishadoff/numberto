@@ -18,7 +18,9 @@ Features to be added
   - `pentagonals`
   - `hexagonals`
   - `collatz`
+  - `farey`
 * Printers
   - `format-ratio` ;; TODOS
 * Irrational
   - `e`, `pi`, `sqrt n` calculations
+* Validator improved

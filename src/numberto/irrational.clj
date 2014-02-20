@@ -1,6 +1,7 @@
 (ns numberto.irrational
   (:require [numberto.printers :as p])
   (:require [numberto.math :as m])
+  (:require [numberto.validator :as v])
   (:require [numberto.seqs :as s]))
 
 ;; "Gimme E, Gimme PI, Gimme that which I desire"
@@ -26,12 +27,14 @@
        (dec)
        (dec)
        (#(p/format-ratio % limit))))
-       
+
 (defn sqrt [num & {:keys [iterations limit] 
                    :or {iterations 100 limit 16}}]
   "Calculate sqroot by continued fraction"
+  (v/validate num :integer :positive)
   (->> (s/continued-fraction-sqroot num)
        (take iterations)
        (reverse)
        (reduce #(+ %2 (/ 1 %1)))
        (#(p/format-ratio % limit))))
+

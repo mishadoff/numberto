@@ -73,6 +73,7 @@
 
 (defn collatz [n]
   "lazy collatz sequence"
+  (v/validate n :integer :positive)
   (letfn [(next-conj [n]
             (cons n 
                   (cond (= n 1) '()

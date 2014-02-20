@@ -64,11 +64,9 @@
 
 (defn radix-convert [^BigInteger num from-radix to-radix]
   "Convert integer in string format in base of from-radix to to-radix."
-  (v/validate from-radix :integer 
-              [#(<= 2 % 36) "must be in range [2..36]"])
-  (v/validate to-radix :integer 
-              [#(<= 2 % 36) "must be in range [2..36]"])
-  (v/validate num :string
+  (v/validate from-radix :integer [#(<= 2 % 36) "must be in range [2..36]"])
+  (v/validate to-radix :integer [#(<= 2 % 36) "must be in range [2..36]"])
+  (v/validate num :string 
               [#(try (do (BigInteger. % from-radix) true)
                      (catch NumberFormatException e false))
                "must be in format of base [from-radix]"])
