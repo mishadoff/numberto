@@ -62,7 +62,7 @@
          (map (partial reduce +))
          (reduce #(if (< %1 %2) (+ %1 %2) (- %1 %2))))))
 
-(defn radix-convert [^BigInteger num from-radix to-radix]
+(defn radix-convert [num from-radix to-radix]
   "Convert integer in string format in base of from-radix to to-radix."
   (v/validate from-radix :integer [#(<= 2 % 36) "must be in range [2..36]"])
   (v/validate to-radix :integer [#(<= 2 % 36) "must be in range [2..36]"])
@@ -74,3 +74,5 @@
   (-> num
       (BigInteger. from-radix)
       (.toString to-radix)))
+
+;; TODO infix

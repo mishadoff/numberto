@@ -15,7 +15,7 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
        (remove empty?)
        (map c/digits->num)))
 
-(defn- all-splits [numbers]
+(defn- splits [numbers]
   (let [n (dec (count numbers))
         fill-zeros (partial format (str "%0" n "d"))
         limit (m/power* 2 n)]
