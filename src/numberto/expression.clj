@@ -5,7 +5,7 @@
 (def *DEBUG* (atom false))
 
 ;; can be replaced if you want to tweak algorithm
-;; change priority, or add new functions
+;; change priority, or add new operations
 (def op-table
   (atom
    {"+" {:priority 1 :function + :assoc :left}
@@ -35,7 +35,7 @@
        (interpose "|") ;; based on op-table var
        (apply str)
        (replace regexp-esc-map)
-       (apply str "\\w+|\\,|\\d+|\\(|\\)|") ;; adding numbers and parens
+       (apply str "\\w+|\\,|\\d+|\\(|\\)|") ;; adding numbers, symbols and parens
        (re-pattern)
        (#(re-seq % expr))))
 
@@ -79,10 +79,13 @@ Supported operations defined in the atom @op-table
         (println "Opstack:" opstack))
       (if (> p limit)
         ;; No more tokens
-        (if (empty? opstack) output
-            (let [[_ tag _ :as triple] (peek opstack)]
-              (when (= tag :left-paren) (parse-error))
-              (recur p (conj output triple) (pop opstack))))
+        (do 
+          (when @*DEBUG*
+            (println "----------------------"))
+          (if (empty? opstack) output
+              (let [[_ tag _ :as triple] (peek opstack)]
+                (when (= tag :left-paren) (parse-error))
+                (recur p (conj output triple) (pop opstack)))))
         ;; Token process
         (let [[op1 tag props :as triple] (nth tokens p)]
           (when @*DEBUG*
@@ -121,8 +124,7 @@ Supported operations defined in the atom @op-table
 
 (defn- eval-postfix [tagged-tokens bindings]
   "Evaluates postfix expression. 1 2 + => 3"
-  (loop [[[token tag value :as triple] & tokens]
-         tagged-tokens stack (list)]
+  (loop [[[token tag value :as triple] & tokens] tagged-tokens stack (list)]
     (if triple
       (cond (= :number tag) (recur tokens (conj stack value))
             (= :symbol tag)
@@ -137,7 +139,7 @@ Supported operations defined in the atom @op-table
               (recur tokens (conj (drop arity stack)
                                   (apply f (reverse (take arity stack))))))
             :else (throw (IllegalArgumentException. "Invalid RPN")))
-      (first stack))))
+      (first stack)))) ;; more in stack?
 
 (defn eval-infix 
   "Evaluate infix expression.
@@ -151,17 +153,41 @@ If functions or symbols are used, provide bindings map
 (defn infix->prefix [expr]
   "Converts infix expression to lisp-style prefix expression
    Example: a + b * c => (+ a (* b c))"
-  (let [postfix (infix->postfix expr)]
-    
-    ))
+  (let [postfix (infix->postfix expr) bindings {}]
+    (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
+      (if triple
+        (cond (= :number tag) (recur tokens (conj stack token))
+              (= :symbol tag) (recur tokens (conj stack token))
+              (= :op tag) (recur tokens (conj (drop 2 stack)
+                                              (str "(" token " " (apply str (interpose " " (reverse (take 2 stack)))) ")")))
+              (= :function tag)
+              (let [arity (bindings token)]
+                (recur tokens (conj (drop arity stack)
+                                    (str "(" token " " (apply str (interpose " " (reverse (take arity stack)))) ")")))) 
+               :else (throw (IllegalArgumentException. "Invalid RPN")))
+        (first stack)))))
 
 ;; DONE Associativity
-;; TODO Unary back front
+;; DONE custom functions
+;; DONE Arity
+;; TODO Arity guesses
+;; TODO Unary operations
+;; TODO Simplify multiple ops (* (* (* 1 2 3)))
+;; TODO Handle arity in eval?
+;; TODO Double numbers
+;; TODO 2a
+;; TODO Unary back
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
 ;; TODO prefix
-;; TODO custom functions
-;; TODO Arity
 ;; TODO clean code
 ;; TODO tests
+;; TODO avoid false positives
+
+
+;; Not supported \\w+ symbols
+;; Not supported \\w+ functions
+;; Shared place for symbol and function names
+;; No arity overloading for functions
+;; NUmber borders support
