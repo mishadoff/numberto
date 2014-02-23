@@ -69,7 +69,8 @@ Supported operations defined in the atom @op-table
 "
   (let [tokens (vec (tag (tokenize e)))
         functions (filter (fn [[_ tag _]] (= tag :function)) tokens)
-        limit (dec (count tokens))]
+        limit (dec (count tokens))
+        ]
     (when @*DEBUG*
       (println "Input:" e)
       (println "Tagged Tokens:" tokens)
@@ -90,23 +91,22 @@ Supported operations defined in the atom @op-table
                 (when (= tag :left-paren) (parse-error))
                 (recur p (conj output triple) (pop opstack) funstack arity))))
         ;; Token process
-        (let [[op1 tag props :as triple] (nth tokens p)]
+        (let [[op1 tag props :as triple] (nth tokens p)
+              [_ prevtag _ :as prev] (if (> p 0) (nth tokens (dec p)) nil)]
           (when @*DEBUG*
             (println "Token: " triple)
             (println "----------------------"))
           (cond (or (= tag :number) (= tag :symbol))
-                (let [[f a :as fun] (peek funstack)
-                      new-funstack (if fun (conj (pop funstack) [f (inc a)]) arity)]
-                  (recur (inc p) (conj output triple) opstack new-funstack arity))
+                (recur (inc p) (conj output triple) opstack funstack arity)
                 (= tag :function)
-                (let [[f a :as fun] (peek funstack)
-                      new-funstack (if fun (conj (pop funstack) [f (inc a)]) arity)]
-                  (recur (inc p) output (conj opstack triple) (conj new-funstack [op1 0]) arity))
+                (recur (inc p) output (conj opstack triple) (conj funstack [op1 1]) arity)
                 (= tag :arg-separator)
-                (let [[op2 tag2 _ :as all2] (peek opstack)]
+                (let [[op2 tag2 _ :as all2] (peek opstack)
+                      [f ar] (peek funstack)
+                      new-funstack (conj (pop funstack) [f (inc ar)])]
                   (when-not all2 (parse-error)) ;; empty stack
                   (if (= :left-paren tag2)
-                    (recur (inc p) output opstack funstack arity)
+                    (recur (inc p) output opstack new-funstack arity)
                     (recur p (conj output all2) (pop opstack) funstack arity)))
                 (= tag :op)
                 (let [[op2 _ _ :as all2] (peek opstack) props2 (@op-table op2)
@@ -122,31 +122,35 @@ Supported operations defined in the atom @op-table
                   (if (= :left-paren tag2)
                     (if (and (second opstack)
                              (= :function (second (second opstack))))
-                      (recur (inc p) (conj output (second opstack)) (pop (pop opstack)) (pop funstack)
-                             (conj arity (peek funstack)))
+                      (let [[f ar] (peek funstack) newarity (if (= prevtag :left-paren) [f 0] [f ar])]
+                        (recur (inc p) (conj output (second opstack)) (pop (pop opstack)) (pop funstack)
+                               (conj arity newarity)))
                       (recur (inc p) output (pop opstack) funstack arity))
                     (recur p (conj output all2) (pop opstack) funstack arity)))
                 :else (throw (IllegalArgumentException. "Not supported yet"))))))))
 
-(defn- eval-postfix [tagged-tokens bindings]
+(defn- eval-postfix [postfix bindings]
   "Evaluates postfix expression. 1 2 + => 3"
-  (loop [[[token tag value :as triple] & tokens] tagged-tokens stack (list)]
-    (if triple
-      (cond (= :number tag) (recur tokens (conj stack value))
-            (= :symbol tag)
-            (let [value (bindings token)]
-              (if-not value (eval-error token))
-              (recur tokens (conj stack (bindings token))))
-            (= :op tag) (recur tokens (conj (drop 2 stack)
-                                          (apply (:function value) (reverse (take 2 stack)))))
-            (= :function tag)
-            (let [[f arity :as b] (bindings token)]
-              (if-not b (eval-error token))
-              (recur tokens (conj (drop arity stack)
-                                  (apply f (reverse (take arity stack))))))
-            :else (throw (IllegalArgumentException. "Invalid RPN")))
-      (first stack)))) ;; more in stack?
-
+  (let [raw-arities (:arity postfix) arities (apply hash-map (flatten raw-arities))]
+    (if-not (= (count arities) (count raw-arities))
+      (throw (IllegalArgumentException. "Functions overloading not supported yet")))
+    (loop [[[token tag value :as triple] & tokens] (:postfix postfix) stack (list)]
+      (if triple
+        (cond (= :number tag) (recur tokens (conj stack value))
+              (= :symbol tag)
+              (let [value (bindings token)]
+                (if-not value (eval-error token))
+                (recur tokens (conj stack (bindings token))))
+              (= :op tag) (recur tokens (conj (drop 2 stack)
+                                              (apply (:function value) (reverse (take 2 stack)))))
+              (= :function tag)
+              (let [f (bindings token) arity (arities token)]
+                (if-not f (eval-error token))
+                (recur tokens (conj (drop arity stack)
+                                    (apply f (reverse (take arity stack))))))
+              :else (throw (IllegalArgumentException. "Invalid RPN")))
+        (first stack))))) ;; more in stack?
+  
 (defn eval-infix 
   "Evaluate infix expression.
 If functions or symbols are used, provide bindings map
@@ -160,7 +164,12 @@ If functions or symbols are used, provide bindings map
   "Converts infix expression to lisp-style prefix expression
    Example: a + b * c => (+ a (* b c))"
   (let [postfix-map (infix->postfix expr)
-        postfix (:postfix postfix-map) bindings (:arity postfix-map)] ;; TODO temp binding remove
+        postfix (:postfix postfix-map)
+        raw-bindings (:arity postfix-map)
+        bindings (apply hash-map (flatten raw-bindings))]
+    ;; validate arities
+    (if-not (= (count bindings) (count raw-bindings))
+      (throw (IllegalArgumentException. "Functions overloading not supported yet")))
     (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
       (if triple
         (cond (= :number tag) (recur tokens (conj stack token))
@@ -177,7 +186,7 @@ If functions or symbols are used, provide bindings map
 ;; DONE Associativity
 ;; DONE custom functions
 ;; DONE Arity
-;; TODO Arity guess
+;; DONE Arity guess
 ;; TODO Zero arity functions
 ;; TODO Unary operations
 ;; TODO Simplify multiple ops (* (* (* 1 2 3)))
