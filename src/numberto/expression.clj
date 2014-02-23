@@ -68,58 +68,64 @@ Shunting-Yard algorithm
 Supported operations defined in the atom @op-table
 "
   (let [tokens (vec (tag (tokenize e)))
+        functions (filter (fn [[_ tag _]] (= tag :function)) tokens)
         limit (dec (count tokens))]
     (when @*DEBUG*
       (println "Input:" e)
       (println "Tagged Tokens:" tokens)
       (println "----------------------"))
-    (loop [p 0 output [] opstack (list)]
+    (loop [p 0 output [] opstack (list) funstack (list) arity []]
       (when @*DEBUG*
         (println "Output:" output)
-        (println "Opstack:" opstack))
+        (println "Opstack:" opstack)
+        (println "Funstack:" funstack)
+        (println "Arity:" arity))
       (if (> p limit)
         ;; No more tokens
         (do 
           (when @*DEBUG*
             (println "----------------------"))
-          (if (empty? opstack) output
+          (if (empty? opstack) {:postfix output :arity arity}
               (let [[_ tag _ :as triple] (peek opstack)]
                 (when (= tag :left-paren) (parse-error))
-                (recur p (conj output triple) (pop opstack)))))
+                (recur p (conj output triple) (pop opstack) funstack arity))))
         ;; Token process
         (let [[op1 tag props :as triple] (nth tokens p)]
           (when @*DEBUG*
             (println "Token: " triple)
             (println "----------------------"))
-          (cond (= tag :number)
-                (recur (inc p) (conj output triple) opstack)
-                (= tag :symbol)
-                (recur (inc p) (conj output triple) opstack)
+          (cond (or (= tag :number) (= tag :symbol))
+                (let [[f a :as fun] (peek funstack)
+                      new-funstack (if fun (conj (pop funstack) [f (inc a)]) arity)]
+                  (recur (inc p) (conj output triple) opstack new-funstack arity))
                 (= tag :function)
-                (recur (inc p) output (conj opstack triple))
+                (let [[f a :as fun] (peek funstack)
+                      new-funstack (if fun (conj (pop funstack) [f (inc a)]) arity)]
+                  (recur (inc p) output (conj opstack triple) (conj new-funstack [op1 0]) arity))
                 (= tag :arg-separator)
                 (let [[op2 tag2 _ :as all2] (peek opstack)]
                   (when-not all2 (parse-error)) ;; empty stack
                   (if (= :left-paren tag2)
-                    (recur (inc p) output opstack)
-                    (recur p (conj output all2) (pop opstack))))
+                    (recur (inc p) output opstack funstack arity)
+                    (recur p (conj output all2) (pop opstack) funstack arity)))
                 (= tag :op)
                 (let [[op2 _ _ :as all2] (peek opstack) props2 (@op-table op2)
                       [p1 p2] (map :priority [props props2])]
                   (if (and props2 (or (< p1 p2) (and (= :left (:assoc props)) (= p1 p2))))
-                    (recur p (conj output all2) (pop opstack))
-                    (recur (inc p) output (conj opstack triple))))
+                    (recur p (conj output all2) (pop opstack) funstack arity)
+                    (recur (inc p) output (conj opstack triple) funstack arity)))
                 (= tag :left-paren)
-                (recur (inc p) output (conj opstack triple))
+                (recur (inc p) output (conj opstack triple) funstack arity)
                 (= tag :right-paren) ;; optimize ;; handle mismatches
                 (let [[op2 tag2 _ :as all2] (peek opstack)]
                   (when-not all2 (parse-error)) ;; empty stack
                   (if (= :left-paren tag2)
                     (if (and (second opstack)
                              (= :function (second (second opstack))))
-                      (recur (inc p) (conj output (second opstack)) (pop (pop opstack)))
-                      (recur (inc p) output (pop opstack)))
-                    (recur p (conj output all2) (pop opstack))))
+                      (recur (inc p) (conj output (second opstack)) (pop (pop opstack)) (pop funstack)
+                             (conj arity (peek funstack)))
+                      (recur (inc p) output (pop opstack) funstack arity))
+                    (recur p (conj output all2) (pop opstack) funstack arity)))
                 :else (throw (IllegalArgumentException. "Not supported yet"))))))))
 
 (defn- eval-postfix [tagged-tokens bindings]
@@ -153,7 +159,8 @@ If functions or symbols are used, provide bindings map
 (defn infix->prefix [expr]
   "Converts infix expression to lisp-style prefix expression
    Example: a + b * c => (+ a (* b c))"
-  (let [postfix (infix->postfix expr) bindings {}]
+  (let [postfix-map (infix->postfix expr)
+        postfix (:postfix postfix-map) bindings (:arity postfix-map)] ;; TODO temp binding remove
     (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
       (if triple
         (cond (= :number tag) (recur tokens (conj stack token))
@@ -170,7 +177,8 @@ If functions or symbols are used, provide bindings map
 ;; DONE Associativity
 ;; DONE custom functions
 ;; DONE Arity
-;; TODO Arity guesses
+;; TODO Arity guess
+;; TODO Zero arity functions
 ;; TODO Unary operations
 ;; TODO Simplify multiple ops (* (* (* 1 2 3)))
 ;; TODO Handle arity in eval?
@@ -184,6 +192,7 @@ If functions or symbols are used, provide bindings map
 ;; TODO clean code
 ;; TODO tests
 ;; TODO avoid false positives
+;; TODO Invalid token
 
 
 ;; Not supported \\w+ symbols
