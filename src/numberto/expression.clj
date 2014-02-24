@@ -21,7 +21,6 @@
 (defn- eval-error [symbol]
   (throw (IllegalArgumentException. (str "Binding for [" symbol "] is not provided"))))
 
-
 (def ^:private regexp-esc-map
   "regexp escape map"
   (let [esc-chars "()[]{}*+/&^$%#!"]
@@ -35,7 +34,7 @@
        (interpose "|") ;; based on op-table var
        (apply str)
        (replace regexp-esc-map)
-       (apply str "\\w+|\\,|\\d+|\\(|\\)|") ;; adding numbers, symbols and parens
+       (apply str "[a-zA-Z]\\w+|\\,|\\d+\\.\\d+|\\d+|\\(|\\)|") ;; adding numbers, symbols and parens
        (re-pattern)
        (#(re-seq % expr))))
 
@@ -50,6 +49,8 @@ Returns the triple [original value, tag, real value]"
    (fn [[left token right]]
      (cond (= (count (re-find #"\d+" token)) (count token))
            [token :number (bigint token)]
+           (= (count (re-find #"\d+\.\d+" token)) (count token))
+           [token :number (bigdec token)]
            (= "(" token) [token :left-paren \(]
            (= ")" token) [token :right-paren \)]
            (= "," token) [token :arg-separator \,]
@@ -187,23 +188,25 @@ If functions or symbols are used, provide bindings map
 ;; DONE custom functions
 ;; DONE Arity
 ;; DONE Arity guess
-;; TODO Zero arity functions
-;; TODO Unary operations
-;; TODO Simplify multiple ops (* (* (* 1 2 3)))
-;; TODO Handle arity in eval?
-;; TODO Double numbers
-;; TODO 2a
-;; TODO Unary back
+;; DONE Zero arity functions
+;; DONE prefix
+;; DONE Double numbers
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
-;; TODO prefix
 ;; TODO clean code
 ;; TODO tests
-;; TODO avoid false positives
 ;; TODO Invalid token
+;; TODO Automata tokenizator
+;; TODO avoid false positives
 
-
+;;;;;;;;;;;;;;;;;;;;
+;; Not included ;;;;
+;;;;;;;;;;;;;;;;;;;;
+;; TODO Simplify multiple ops (* (* (* 1 2 3)))
+;; TODO Unary operations
+;; TODO Unary back
+;; TODO 2a
 ;; Not supported \\w+ symbols
 ;; Not supported \\w+ functions
 ;; Shared place for symbol and function names
