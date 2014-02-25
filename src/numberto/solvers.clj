@@ -49,3 +49,7 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
 
 ;; TODO Customizable operations
 ;; TODO Parens handler
+
+;; Linear Diphontine: ax + by = 1
+;; Pythagorean triples: x^2 + y^2 = z^2
+;; Pell's equation: x^2 - n*y^2 = +-1
