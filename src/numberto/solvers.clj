@@ -44,9 +44,8 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
                (rest)
                (apply str))))))
 
-(defn insert-ops-solver [numbers]
+(defn solve-insert-ops [numbers]
   (map #(vec [(e/eval-infix %) %]) (permute-ops numbers)))
-
 
 (defn solve-quadratic [a b c]
   "Solve equation: a*x^2 + b*x + c = 0"
@@ -55,7 +54,7 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
      (zero? d) [(/ (- b) (* 2 a))]
      (pos? d) [(/ (- (- b) (Math/sqrt d)) (* 2 a))
                (/ (+ (- b) (Math/sqrt d)) (* 2 a))]
-     :else (throw (IllegalArgumentException. "No real solution")))))
+     :else [])))
 
 ;; TODO Customizable operations
 ;; TODO Parens handler

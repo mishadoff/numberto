@@ -1,25 +1,28 @@
 (ns numberto.expression
-  (:require [numberto.math :as m]))
+  (:require [numberto.math :as m])
+  (:require [clojure.string :as s]))
 
 ;; set to true if you want to track parsing process
 (def *DEBUG* (atom false))
 
-;; can be replaced if you want to tweak algorithm
-;; change priority, or add new operations
 (def op-table
-  (atom
-   {"+" {:priority 1 :function + :assoc :left}
-    "-" {:priority 1 :function - :assoc :left}
-    "*" {:priority 2 :function * :assoc :left}
-    "/" {:priority 2 :function / :assoc :left}
-    "^" {:priority 3 :function m/power* :assoc :right}
-    }))
+  {"+"   {:priority 1 :function + :assoc :left}
+   "-"   {:priority 1 :function - :assoc :left}
+   "*"   {:priority 2 :function * :assoc :left}
+   "/"   {:priority 2 :function / :assoc :left}
+   "^"   {:priority 3 :function m/power* :assoc :right}
+   "**"  {:priority 3 :function m/power* :assoc :right}
+  })
 
 (defn- parse-error []
   (throw (IllegalArgumentException. "Invalid expression")))
 
 (defn- eval-error [symbol]
   (throw (IllegalArgumentException. (str "Binding for [" symbol "] is not provided"))))
+
+(defn- token-error [tokens]
+  (throw (IllegalArgumentException. (str "Cannot tokenize symbols " tokens))))
+
 
 (def ^:private regexp-esc-map
   "regexp escape map"
@@ -28,34 +31,43 @@
          (map #(str "\\" %))
          (zipmap esc-chars))))
 
+(defn- validate-tokens [expr tokens]
+  (let [not-parsed (reduce #(s/replace-first %1 %2 "") expr tokens)]
+    (if (empty? (s/trim not-parsed)) tokens
+        (token-error not-parsed))))
+        
 (defn- tokenize [expr]
   "split expression into list of known tokens"
-  (->> (keys @op-table) ;; building tokenization regexp
+  (->> (keys op-table) ;; building tokenization regexp
+       (sort-by count) ;; longest symbols comes first
+       (reverse)       ;; to build correct
        (interpose "|") ;; based on op-table var
        (apply str)
        (replace regexp-esc-map)
-       (apply str "[a-zA-Z]\\w+|\\,|\\d+\\.\\d+|\\d+|\\(|\\)|") ;; adding numbers, symbols and parens
+       (apply str "[a-zA-Z_][a-zA-Z_0-9]*|\\,|\\d+\\.\\d+|\\d+|\\(|\\)|")
        (re-pattern)
-       (#(re-seq % expr))))
+       (#(re-seq % expr))
+       ;; validate that no other symbols left unparsed
+       (validate-tokens expr)))
 
 (defn- tag [tokens]
   "Tag the tokens type. Almost all tokens can be tagged
 independently, except ones that need context.
 Context captured for left and right neighbour.
 Available types:
-[:number :left-paren :right-paren :function :funcall]
+[:number :left-paren :right-paren :function]
 Returns the triple [original value, tag, real value]"
   (map
    (fn [[left token right]]
      (cond (= (count (re-find #"\d+" token)) (count token))
            [token :number (bigint token)]
            (= (count (re-find #"\d+\.\d+" token)) (count token))
-           [token :number (bigdec token)]
+           [token :number (Double/parseDouble token)]
            (= "(" token) [token :left-paren \(]
            (= ")" token) [token :right-paren \)]
            (= "," token) [token :arg-separator \,]
-           (@op-table token)
-           [token :op (@op-table token)]
+           (op-table token)
+           [token :op (op-table token)]
            (= (count (re-find #"\w+" token)) (count token))
            (cond (= "(" right)
                  [token :function token]
@@ -66,7 +78,7 @@ Returns the triple [original value, tag, real value]"
 (defn- infix->postfix [e]
   "Parse infix expression into Reverse Polish Notation.
 Shunting-Yard algorithm
-Supported operations defined in the atom @op-table
+Supported operations defined in the atom op-table
 "
   (let [tokens (vec (tag (tokenize e)))
         functions (filter (fn [[_ tag _]] (= tag :function)) tokens)
@@ -110,7 +122,7 @@ Supported operations defined in the atom @op-table
                     (recur (inc p) output opstack new-funstack arity)
                     (recur p (conj output all2) (pop opstack) funstack arity)))
                 (= tag :op)
-                (let [[op2 _ _ :as all2] (peek opstack) props2 (@op-table op2)
+                (let [[op2 _ _ :as all2] (peek opstack) props2 (op-table op2)
                       [p1 p2] (map :priority [props props2])]
                   (if (and props2 (or (< p1 p2) (and (= :left (:assoc props)) (= p1 p2))))
                     (recur p (conj output all2) (pop opstack) funstack arity)
@@ -196,7 +208,7 @@ If functions or symbols are used, provide bindings map
 ;; TODO unbalanced parens
 ;; TODO clean code
 ;; TODO tests
-;; TODO Invalid token
+;; DONE Invalid token
 ;; TODO Automata tokenizator
 ;; TODO avoid false positives
 
