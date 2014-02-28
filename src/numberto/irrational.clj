@@ -37,4 +37,3 @@
        (reverse)
        (reduce #(+ %2 (/ 1 %1)))
        (#(p/format-ratio % limit))))
-
