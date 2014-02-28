@@ -23,7 +23,6 @@
 (defn- token-error [tokens]
   (throw (IllegalArgumentException. (str "Cannot tokenize symbols " tokens))))
 
-
 (def ^:private regexp-esc-map
   "regexp escape map"
   (let [esc-chars "()[]{}*+/&^$%#!"]
@@ -32,10 +31,11 @@
          (zipmap esc-chars))))
 
 (defn- validate-tokens [expr tokens]
+  "return tokens if expr is fully parsed, otherwise IAE is thrown"
   (let [not-parsed (reduce #(s/replace-first %1 %2 "") expr tokens)]
     (if (empty? (s/trim not-parsed)) tokens
         (token-error not-parsed))))
-        
+
 (defn- tokenize [expr]
   "split expression into list of known tokens"
   (->> (keys op-table) ;; building tokenization regexp
@@ -47,16 +47,13 @@
        (apply str "[a-zA-Z_][a-zA-Z_0-9]*|\\,|\\d+\\.\\d+|\\d+|\\(|\\)|")
        (re-pattern)
        (#(re-seq % expr))
-       ;; validate that no other symbols left unparsed
        (validate-tokens expr)))
 
 (defn- tag [tokens]
   "Tag the tokens type. Almost all tokens can be tagged
 independently, except ones that need context.
 Context captured for left and right neighbour.
-Available types:
-[:number :left-paren :right-paren :function]
-Returns the triple [original value, tag, real value]"
+Returns the triple [original value, tag, real value+meta]"
   (map
    (fn [[left token right]]
      (cond (= (count (re-find #"\d+" token)) (count token))
@@ -66,20 +63,17 @@ Returns the triple [original value, tag, real value]"
            (= "(" token) [token :left-paren \(]
            (= ")" token) [token :right-paren \)]
            (= "," token) [token :arg-separator \,]
-           (op-table token)
-           [token :op (op-table token)]
-           (= (count (re-find #"\w+" token)) (count token))
+           (op-table token) [token :op (op-table token)]
+           (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
            (cond (= "(" right)
                  [token :function token]
                  :else [token :symbol token])
-           :else (throw (IllegalArgumentException. (str "Unsupported token [" token "]")))))
+           :else (token-error token)))
    (partition 3 1 (concat [:gap] tokens [:gap]))))
 
 (defn- infix->postfix [e]
   "Parse infix expression into Reverse Polish Notation.
-Shunting-Yard algorithm
-Supported operations defined in the atom op-table
-"
+Shunting-Yard algorithm. Supported operations defined in the op-table"
   (let [tokens (vec (tag (tokenize e)))
         functions (filter (fn [[_ tag _]] (= tag :function)) tokens)
         limit (dec (count tokens))
@@ -94,25 +88,26 @@ Supported operations defined in the atom op-table
         (println "Opstack:" opstack)
         (println "Funstack:" funstack)
         (println "Arity:" arity))
-      (if (> p limit)
-        ;; No more tokens
-        (do 
-          (when @*DEBUG*
-            (println "----------------------"))
-          (if (empty? opstack) {:postfix output :arity arity}
-              (let [[_ tag _ :as triple] (peek opstack)]
-                (when (= tag :left-paren) (parse-error))
-                (recur p (conj output triple) (pop opstack) funstack arity))))
-        ;; Token process
+      (if (> p limit) ;; No more tokens
+        (do (when @*DEBUG*
+              (println "----------------------"))
+            (if (empty? opstack) {:postfix output :arity arity}
+                (let [[_ tag _ :as triple] (peek opstack)]
+                  (if (= tag :left-paren) (parse-error))
+                  (recur p (conj output triple) (pop opstack) funstack arity))))
+        ;; Token processing
         (let [[op1 tag props :as triple] (nth tokens p)
               [_ prevtag _ :as prev] (if (> p 0) (nth tokens (dec p)) nil)]
           (when @*DEBUG*
             (println "Token: " triple)
             (println "----------------------"))
-          (cond (or (= tag :number) (= tag :symbol))
+          (cond (or (= tag :number)
+                    (= tag :symbol))
                 (recur (inc p) (conj output triple) opstack funstack arity)
+                
                 (= tag :function)
                 (recur (inc p) output (conj opstack triple) (conj funstack [op1 1]) arity)
+
                 (= tag :arg-separator)
                 (let [[op2 tag2 _ :as all2] (peek opstack)
                       [f ar] (peek funstack)
@@ -121,17 +116,20 @@ Supported operations defined in the atom op-table
                   (if (= :left-paren tag2)
                     (recur (inc p) output opstack new-funstack arity)
                     (recur p (conj output all2) (pop opstack) funstack arity)))
+                
                 (= tag :op)
                 (let [[op2 _ _ :as all2] (peek opstack) props2 (op-table op2)
                       [p1 p2] (map :priority [props props2])]
                   (if (and props2 (or (< p1 p2) (and (= :left (:assoc props)) (= p1 p2))))
                     (recur p (conj output all2) (pop opstack) funstack arity)
                     (recur (inc p) output (conj opstack triple) funstack arity)))
+
                 (= tag :left-paren)
                 (recur (inc p) output (conj opstack triple) funstack arity)
-                (= tag :right-paren) ;; optimize ;; handle mismatches
+
+                (= tag :right-paren) 
                 (let [[op2 tag2 _ :as all2] (peek opstack)]
-                  (when-not all2 (parse-error)) ;; empty stack
+                  (when-not all2 (parse-error))
                   (if (= :left-paren tag2)
                     (if (and (second opstack)
                              (= :function (second (second opstack))))
@@ -140,6 +138,7 @@ Supported operations defined in the atom op-table
                                (conj arity newarity)))
                       (recur (inc p) output (pop opstack) funstack arity))
                     (recur p (conj output all2) (pop opstack) funstack arity)))
+
                 :else (throw (IllegalArgumentException. "Not supported yet"))))))))
 
 (defn- eval-postfix [postfix bindings]
@@ -185,16 +184,26 @@ If functions or symbols are used, provide bindings map
       (throw (IllegalArgumentException. "Functions overloading not supported yet")))
     (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
       (if triple
-        (cond (= :number tag) (recur tokens (conj stack token))
-              (= :symbol tag) (recur tokens (conj stack token))
-              (= :op tag) (recur tokens (conj (drop 2 stack)
-                                              (str "(" token " " (apply str (interpose " " (reverse (take 2 stack)))) ")")))
+        (cond (or (= :number tag)
+                  (= :symbol tag))
+              (recur tokens (conj stack token))
+              (= :op tag)
+              (recur tokens (->> (take 2 stack)
+                                 (reverse)
+                                 (interpose " ")
+                                 (apply str)
+                                 (#(str "(" token " " % ")"))
+                                 (conj (drop 2 stack))))
               (= :function tag)
               (let [arity (bindings token)]
-                (recur tokens (conj (drop arity stack)
-                                    (str "(" token " " (apply str (interpose " " (reverse (take arity stack)))) ")")))) 
-               :else (throw (IllegalArgumentException. "Invalid RPN")))
-        (first stack)))))
+                (recur tokens (->> (take arity stack)
+                                   (reverse)
+                                   (interpose " ")
+                                   (apply str)
+                                   (#(str "(" token " " % ")"))
+                                   (conj (drop arity stack)))))
+              :else (throw (IllegalArgumentException. "Invalid RPN")))
+              (first stack)))))
 
 ;; DONE Associativity
 ;; DONE custom functions
@@ -203,18 +212,19 @@ If functions or symbols are used, provide bindings map
 ;; DONE Zero arity functions
 ;; DONE prefix
 ;; DONE Double numbers
+;; DONE Invalid token
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
 ;; TODO clean code
 ;; TODO tests
-;; DONE Invalid token
-;; TODO Automata tokenizator
 ;; TODO avoid false positives
+;; TODO Code duplication
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Not included ;;;;
 ;;;;;;;;;;;;;;;;;;;;
+;; No unary support
 ;; TODO Simplify multiple ops (* (* (* 1 2 3)))
 ;; TODO Unary operations
 ;; TODO Unary back
@@ -223,4 +233,4 @@ If functions or symbols are used, provide bindings map
 ;; Not supported \\w+ functions
 ;; Shared place for symbol and function names
 ;; No arity overloading for functions
-;; NUmber borders support
+;; Bigintegers and Double
