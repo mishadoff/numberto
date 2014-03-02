@@ -1,27 +1,28 @@
 (ns numberto.expression
   (:require [numberto.math :as m])
+  (:require [numberto.validator :as v])
   (:require [clojure.string :as s]))
 
 ;; set to true if you want to track parsing process
 (def *DEBUG* (atom false))
 
 (def op-table
-  {"+"   {:priority 1 :function + :assoc :left}
-   "-"   {:priority 1 :function - :assoc :left}
-   "*"   {:priority 2 :function * :assoc :left}
-   "/"   {:priority 2 :function / :assoc :left}
-   "^"   {:priority 3 :function m/power* :assoc :right}
-   "**"  {:priority 3 :function m/power* :assoc :right}
+  {"+"   {:priority 1 :function + :assoc :left :arity 2}
+   "-"   {:priority 1 :function - :assoc :left :arity 2}
+   "*"   {:priority 2 :function * :assoc :left :arity 2}
+   "/"   {:priority 2 :function / :assoc :left :arity 2}
+   "^"   {:priority 3 :function m/power* :assoc :right :arity 2}
+   "**"  {:priority 3 :function m/power* :assoc :right :arity 2}
   })
 
 (defn- parse-error []
-  (throw (IllegalArgumentException. "Invalid expression")))
+  (v/throw-iae "Invalid expression"))
 
 (defn- eval-error [symbol]
-  (throw (IllegalArgumentException. (str "Binding for [" symbol "] is not provided"))))
+  (v/throw-iae (str "Binding for [" symbol "] is not provided")))
 
 (defn- token-error [tokens]
-  (throw (IllegalArgumentException. (str "Cannot tokenize symbols " tokens))))
+  (v/throw-iae (str "Cannot tokenize symbols " tokens)))
 
 (def ^:private regexp-esc-map
   "regexp escape map"
@@ -65,9 +66,7 @@ Returns the triple [original value, tag, real value+meta]"
            (= "," token) [token :arg-separator \,]
            (op-table token) [token :op (op-table token)]
            (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
-           (cond (= "(" right)
-                 [token :function token]
-                 :else [token :symbol token])
+           (if (= "(" right) [token :function token] [token :symbol token])
            :else (token-error token)))
    (partition 3 1 (concat [:gap] tokens [:gap]))))
 
@@ -178,32 +177,28 @@ If functions or symbols are used, provide bindings map
   (let [postfix-map (infix->postfix expr)
         postfix (:postfix postfix-map)
         raw-bindings (:arity postfix-map)
-        bindings (apply hash-map (flatten raw-bindings))]
+        bindings (apply hash-map (flatten raw-bindings))
+        take-and-drop (fn [n stack token]
+                        (->> (take n stack)
+                             (reverse)
+                             (interpose " ")
+                             (apply str)
+                             (#(str "(" token " " % ")"))
+                             (conj (drop n stack))))]
     ;; validate arities
     (if-not (= (count bindings) (count raw-bindings))
-      (throw (IllegalArgumentException. "Functions overloading not supported yet")))
+      (v/throw-iae "Functions overloading not supported yet"))
     (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
       (if triple
         (cond (or (= :number tag)
                   (= :symbol tag))
               (recur tokens (conj stack token))
               (= :op tag)
-              (recur tokens (->> (take 2 stack)
-                                 (reverse)
-                                 (interpose " ")
-                                 (apply str)
-                                 (#(str "(" token " " % ")"))
-                                 (conj (drop 2 stack))))
+              (recur tokens (take-and-drop (:arity value) stack token))
               (= :function tag)
-              (let [arity (bindings token)]
-                (recur tokens (->> (take arity stack)
-                                   (reverse)
-                                   (interpose " ")
-                                   (apply str)
-                                   (#(str "(" token " " % ")"))
-                                   (conj (drop arity stack)))))
+              (recur tokens (take-and-drop (bindings token) stack token))
               :else (throw (IllegalArgumentException. "Invalid RPN")))
-              (first stack)))))
+        (first stack))))) ;; Handle stack
 
 ;; DONE Associativity
 ;; DONE custom functions

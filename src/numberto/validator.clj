@@ -8,20 +8,20 @@
    :negative neg?
    :non-negative (comp not neg?)})
 
-(defn- iae [message] (throw (IllegalArgumentException. message)))
+(defn throw-iae [message] (throw (IllegalArgumentException. message)))
 
 (defn- validate-keyword
   ([e k message]
      (let [fun (get validate-predicates k)]
-       (cond (nil? fun) (iae (str "Not supported predicate [" k "]"))
+       (cond (nil? fun) (throw-iae (str "Not supported predicate [" k "]"))
              (fun e) nil ;; everything is ok
-             :else (iae message))))
+             :else (throw-iae message))))
   ([e k]
      (validate-keyword e k (str "[" e "] does not satisfy predicate [" k "]"))))
 
 (defn- validate-fn
   ([e f message]
-     (if-not (f e) (iae message)))
+     (if-not (f e) (throw-iae message)))
   ([e f]
      (validate-fn e f (str "[" e "] does not satisfy fn [" f "]"))))
 
@@ -44,5 +44,5 @@ Three modes are supported:
        (let [[k message] r]
          (cond (fn? k) (validate-fn e k message)
                (keyword? k) (validate-keyword e k message)
-               :else (iae "Not supported element [" k "]"))))))
+               :else (throw-iae "Not supported element [" k "]"))))))
            
