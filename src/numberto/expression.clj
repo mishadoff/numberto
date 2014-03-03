@@ -75,8 +75,7 @@ Returns the triple [original value, tag, real value+meta]"
 Shunting-Yard algorithm. Supported operations defined in the op-table"
   (let [tokens (vec (tag (tokenize e)))
         functions (filter (fn [[_ tag _]] (= tag :function)) tokens)
-        limit (dec (count tokens))
-        ]
+        limit (dec (count tokens))]
     (when @*DEBUG*
       (println "Input:" e)
       (println "Tagged Tokens:" tokens)
@@ -138,13 +137,13 @@ Shunting-Yard algorithm. Supported operations defined in the op-table"
                       (recur (inc p) output (pop opstack) funstack arity))
                     (recur p (conj output all2) (pop opstack) funstack arity)))
 
-                :else (throw (IllegalArgumentException. "Not supported yet"))))))))
+                :else (v/throw-iae "Not supported yet")))))))
 
 (defn- eval-postfix [postfix bindings]
   "Evaluates postfix expression. 1 2 + => 3"
   (let [raw-arities (:arity postfix) arities (apply hash-map (flatten raw-arities))]
     (if-not (= (count arities) (count raw-arities))
-      (throw (IllegalArgumentException. "Functions overloading not supported yet")))
+      (v/throw-iae "Functions overloading not supported yet"))
     (loop [[[token tag value :as triple] & tokens] (:postfix postfix) stack (list)]
       (if triple
         (cond (= :number tag) (recur tokens (conj stack value))
@@ -159,7 +158,7 @@ Shunting-Yard algorithm. Supported operations defined in the op-table"
                 (if-not f (eval-error token))
                 (recur tokens (conj (drop arity stack)
                                     (apply f (reverse (take arity stack))))))
-              :else (throw (IllegalArgumentException. "Invalid RPN")))
+              :else (v/throw-iae "Invalid RPN"))
         (first stack))))) ;; more in stack?
   
 (defn eval-infix 
@@ -197,7 +196,7 @@ If functions or symbols are used, provide bindings map
               (recur tokens (take-and-drop (:arity value) stack token))
               (= :function tag)
               (recur tokens (take-and-drop (bindings token) stack token))
-              :else (throw (IllegalArgumentException. "Invalid RPN")))
+              :else (v/throw-iae "Invalid RPN"))
         (first stack))))) ;; Handle stack
 
 ;; DONE Associativity
