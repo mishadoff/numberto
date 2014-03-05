@@ -53,3 +53,8 @@
   (is (= [5 16 8 4 2 1] (take 10 (s/collatz 5))))
   (is (= (repeat 10000 1) 
          (map (comp last s/collatz) (range 1 (inc 10000))))))
+
+(deftest fermat-numbers-test
+  (is (= [5 17 257 65537] (take 4 s/fermat-numbers)))
+  (is (= 340282366920938463463374607431768211457N
+         (last (take 7 s/fermat-numbers)))))

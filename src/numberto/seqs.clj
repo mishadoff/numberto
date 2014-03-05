@@ -80,3 +80,6 @@
                         (even? n) (lazy-seq (next-conj (/ n 2)))
                         :else (lazy-seq (next-conj (inc (* 3 n)))))))]
     (next-conj n)))
+
+;; Numbers of form 2^2^n + 1
+(def fermat-numbers (map #(->> % (m/power* 2) (m/power* 2) inc) naturals))
