@@ -4,6 +4,7 @@ Features to be added
   - `sum-of-proper-divisors`
   - `amicable?`
   - `perfect?`
+  - `abundant?`
 * Converters
   - Improved `roman->number`
   - Function `radix-convert` between different bases. Only integers
@@ -11,6 +12,7 @@ Features to be added
   - `sum-of-digits-recur`
   - `power*` avoid potential SO
   - `log`, `log2` functions for bignums
+  - `div?`
 * Generators
   - `rand-bigint`
 * Sequences

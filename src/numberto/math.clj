@@ -130,3 +130,9 @@
   "test whether two numbers are permutations of each other' digits"
   (let [f (comp frequencies c/num->digits)]
     (= (f num1) (f num2))))
+
+(defn div? [a b]
+  "return true if a divisible by b (b|a)"
+  (and (not (zero? b))
+       (zero? (mod a b))))
+

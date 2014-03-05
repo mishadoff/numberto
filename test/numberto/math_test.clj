@@ -138,3 +138,9 @@
   (is (false? (m/permutation? 1232352 2235221)))
   (is (false? (m/permutation? 22111 11121)))
   (is (m/permutation? 9999 9999)))
+
+(deftest div?-test
+  (is (m/div? 100500 100500))
+  (is (m/div? 123 1))
+  (is (m/div? 0 2324))
+  (is (false? (m/div? 1 0))))

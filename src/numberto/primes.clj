@@ -35,6 +35,9 @@
   (let [base (filter #(zero? (mod n %)) (range 2 (Math/sqrt n)))]
     (reduce + 1 (concat (map #(/ n %) base) base))))
 
+;; document
+;; test
+
 (defn amicable? [a b]
   (and (not (= a b))
        (= a (sum-of-proper-divisors b))
@@ -42,3 +45,13 @@
 
 (defn perfect? [a]
   (= a (sum-of-proper-divisors a)))
+
+(defn abundant? [a]
+  (< a (sum-of-proper-divisors a)))
+
+(defn coprime? [a b]
+  (= 1 (m/gcd a b)))
+
+(defn carmichael? [a]
+  ;; TODO
+  )
