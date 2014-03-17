@@ -21,6 +21,7 @@ Features to be added
   - `hexagonals`
   - `collatz`
   - `farey`
+  - `fermat-numbers`
 * Printers
   - `format-ratio` ;; TODOS
 * Irrational

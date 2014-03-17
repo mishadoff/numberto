@@ -15,6 +15,11 @@
    "**"  {:priority 3 :function m/power* :assoc :right :arity 2}
   })
 
+(def unary-table
+  {"-" {:priority 4 :function - :arity 1}
+   "++" {:priority 4 :function inc :arity 1}
+   })
+
 (defn- parse-error []
   (v/throw-iae "Invalid expression"))
 
@@ -39,7 +44,7 @@
 
 (defn- tokenize [expr]
   "split expression into list of known tokens"
-  (->> (keys op-table) ;; building tokenization regexp
+  (->> (concat (keys op-table) (keys unary-table)) ;; building tokenization regexp
        (sort-by count) ;; longest symbols comes first
        (reverse)       ;; to build correct
        (interpose "|") ;; based on op-table var
@@ -50,25 +55,44 @@
        (#(re-seq % expr))
        (validate-tokens expr)))
 
+(defn tag-postprocess [tagged-tokens]
+  (map (fn [[[_ left-tag _] [token tag _ :as e] right]]
+         (if (unary-table token)
+                   ;; Processing
+                   (cond (or (= :gap left-tag) ;; first token
+                             (= :left-paren left-tag)
+                             (= :op left-tag)) [token :unary (unary-table token)]
+                         :else e)
+                   e))
+               (partition 3 1 (concat [[nil :gap nil]]
+                                      tagged-tokens
+                                      [[nil :gap nil]]))
+               ))
+
 (defn- tag [tokens]
   "Tag the tokens type. Almost all tokens can be tagged
 independently, except ones that need context.
 Context captured for left and right neighbour.
 Returns the triple [original value, tag, real value+meta]"
-  (map
-   (fn [[left token right]]
-     (cond (= (count (re-find #"\d+" token)) (count token))
-           [token :number (bigint token)]
-           (= (count (re-find #"\d+\.\d+" token)) (count token))
-           [token :number (Double/parseDouble token)]
-           (= "(" token) [token :left-paren \(]
-           (= ")" token) [token :right-paren \)]
-           (= "," token) [token :arg-separator \,]
-           (op-table token) [token :op (op-table token)]
-           (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
-           (if (= "(" right) [token :function token] [token :symbol token])
-           :else (token-error token)))
-   (partition 3 1 (concat [:gap] tokens [:gap]))))
+  (-> (map
+       (fn [[left token right]]
+         (cond (= (count (re-find #"\d+" token)) (count token))
+               [token :number (bigint token)]
+               (= (count (re-find #"\d+\.\d+" token)) (count token))
+               [token :number (Double/parseDouble token)]
+               (= "(" token) [token :left-paren \(]
+               (= ")" token) [token :right-paren \)]
+               (= "," token) [token :arg-separator \,]
+               (or (op-table token)
+                   (unary-table token)) [token :op (op-table token)]
+                   (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
+                   (if (= "(" right) [token :function token] [token :symbol token])
+                   :else (token-error token)))
+       (partition 3 1 (concat [:gap] tokens [:gap])))
+      (tag-postprocess)))
+;;))
+      
+;; Unary if prev is null, Left Paren, Another operator
 
 (defn- infix->postfix [e]
   "Parse infix expression into Reverse Polish Notation.
@@ -122,6 +146,9 @@ Shunting-Yard algorithm. Supported operations defined in the op-table"
                     (recur p (conj output all2) (pop opstack) funstack arity)
                     (recur (inc p) output (conj opstack triple) funstack arity)))
 
+                (= tag :unary)
+                (recur (inc p) output (conj opstack triple) funstack arity)
+
                 (= tag :left-paren)
                 (recur (inc p) output (conj opstack triple) funstack arity)
 
@@ -153,6 +180,8 @@ Shunting-Yard algorithm. Supported operations defined in the op-table"
                 (recur tokens (conj stack (bindings token))))
               (= :op tag) (recur tokens (conj (drop 2 stack)
                                               (apply (:function value) (reverse (take 2 stack)))))
+              (= :unary tag) (recur tokens (conj (drop 1 stack)
+                                              (apply (:function value) (reverse (take 1 stack)))))
               (= :function tag)
               (let [f (bindings token) arity (arities token)]
                 (if-not f (eval-error token))
@@ -214,6 +243,7 @@ If functions or symbols are used, provide bindings map
 ;; TODO tests
 ;; TODO avoid false positives
 ;; TODO Code duplication
+;; Fill with functions
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Not included ;;;;
