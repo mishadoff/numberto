@@ -19,7 +19,21 @@
 (def unary-table
   {"-"   {:priority 4 :function - :arity 1}
    "++"  {:priority 4 :function inc :arity 1}
-   "!"   {:priority 5 :function f/! :arity 1}
+   })
+
+(def default-bindings
+  {"cos"       #(Math/cos %)
+   "sin"       #(Math/sin %)
+   "sum"       #(m/sum %&) 
+   "max"       max
+   "min"       min
+   "avg"       #(m/avg %&)
+   "log"       m/log
+   "sqrt"      #(Math/sqrt %)
+   
+   ;; Symbols
+   "e"         m/E
+   "pi"        m/PI
    })
 
 (defn- parse-error []
@@ -46,7 +60,8 @@
 
 (defn- tokenize [expr]
   "split expression into list of known tokens"
-  (->> (concat (keys op-table) (keys unary-table)) ;; building tokenization regexp
+  (->> (concat (keys op-table)
+               (keys unary-table)) ;; building tokenization regexp
        (sort-by count) ;; longest symbols comes first
        (reverse)       ;; to build correct
        (interpose "|") ;; based on op-table var
@@ -59,18 +74,18 @@
 
 (defn tag-postprocess [tagged-tokens]
   (map (fn [[[_ left-tag _] [token tag _ :as e] [_ right-tag _]]]
-         (if (unary-table token)
-                   ;; Processing
-                   (cond (or (= :gap left-tag) ;; first token
-                             (= :left-paren left-tag)
-                             (= :op left-tag))
-                         [token :unary (unary-table token)]
-                         :else e)
-                   e))
-               (partition 3 1 (concat [[nil :gap nil]]
-                                      tagged-tokens
-                                      [[nil :gap nil]]))
-               ))
+         (cond (unary-table token)
+               ;; Processing
+               (cond (or (= :gap left-tag) ;; first token
+                         (= :left-paren left-tag)
+                         (= :op left-tag))
+                     [token :unary (unary-table token)]
+                     :else e)
+               :else e))
+       (partition 3 1 (concat [[nil :gap nil]]
+                              tagged-tokens
+                              [[nil :gap nil]]))
+       ))
 
 (defn- tag [tokens]
   "Tag the tokens type. Almost all tokens can be tagged
@@ -116,7 +131,17 @@ Shunting-Yard algorithm. Supported operations defined in the op-table"
       (if (> p limit) ;; No more tokens
         (do (when @*DEBUG*
               (println "----------------------"))
-            (if (empty? opstack) {:postfix output :arity arity}
+            (if (empty? opstack)
+              ;; Postprocess to apply function arities
+              (let [arity (atom arity)]
+                (mapv (fn [[name tag val :as triple]]
+                        (if (= :function tag)
+                          (let [ar (second (first @arity))]
+                            (swap! arity rest)
+                            [name tag {:name name :arity ar}])
+                          triple
+                          ))
+                      output))
                 (let [[_ tag _ :as triple] (peek opstack)]
                   (if (= tag :left-paren) (parse-error))
                   (recur p (conj output triple) (pop opstack) funstack arity))))
@@ -171,44 +196,38 @@ Shunting-Yard algorithm. Supported operations defined in the op-table"
 
 (defn- eval-postfix [postfix bindings]
   "Evaluates postfix expression. 1 2 + => 3"
-  (let [raw-arities (:arity postfix) arities (apply hash-map (flatten raw-arities))]
-    (if-not (= (count arities) (count raw-arities))
-      (v/throw-iae "Functions overloading not supported yet"))
-    (loop [[[token tag value :as triple] & tokens] (:postfix postfix) stack (list)]
-      (if triple
-        (cond (= :number tag) (recur tokens (conj stack value))
-              (= :symbol tag)
-              (let [value (bindings token)]
-                (if-not value (eval-error token))
-                (recur tokens (conj stack (bindings token))))
-              (= :op tag) (recur tokens (conj (drop 2 stack)
-                                              (apply (:function value) (reverse (take 2 stack)))))
-              (= :unary tag) (recur tokens (conj (drop 1 stack)
-                                              (apply (:function value) (reverse (take 1 stack)))))
-              (= :function tag)
-              (let [f (bindings token) arity (arities token)]
-                (if-not f (eval-error token))
-                (recur tokens (conj (drop arity stack)
-                                    (apply f (reverse (take arity stack))))))
+  (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
+    (if triple
+      (cond (= :number tag) (recur tokens (conj stack value))
+            (= :symbol tag)
+            (let [value (bindings token)]
+              (if-not value (eval-error token))
+              (recur tokens (conj stack (bindings token))))
+            (= :op tag) (recur tokens (conj (drop 2 stack)
+                                            (apply (:function value) (reverse (take 2 stack)))))
+            (= :unary tag) (recur tokens (conj (drop 1 stack)
+                                               (apply (:function value) (reverse (take 1 stack)))))
+            (= :function tag)
+            (let [f (bindings token) arity (:arity value)]
+              (if-not f (eval-error token))
+              (recur tokens (conj (drop arity stack)
+                                  (apply f (reverse (take arity stack))))))
               :else (v/throw-iae "Invalid RPN"))
-        (first stack))))) ;; more in stack?
+            (first stack)))) ;; more in stack?
   
 (defn eval-infix 
   "Evaluate infix expression.
 If functions or symbols are used, provide bindings map
 "
   ([expr]
-     (eval-infix expr {}))
+     (eval-infix expr default-bindings))
   ([expr bindings]
-     (eval-postfix (infix->postfix expr) bindings)))
+     (eval-postfix (infix->postfix expr) (merge default-bindings bindings))))
 
 (defn infix->prefix [expr]
   "Converts infix expression to lisp-style prefix expression
    Example: a + b * c => (+ a (* b c))"
-  (let [postfix-map (infix->postfix expr)
-        postfix (:postfix postfix-map)
-        raw-bindings (:arity postfix-map)
-        bindings (apply hash-map (flatten raw-bindings))
+  (let [postfix (infix->postfix expr)
         take-and-drop (fn [n stack token]
                         (->> (take n stack)
                              (reverse)
@@ -216,9 +235,6 @@ If functions or symbols are used, provide bindings map
                              (apply str)
                              (#(str "(" token " " % ")"))
                              (conj (drop n stack))))]
-    ;; validate arities
-    (if-not (= (count bindings) (count raw-bindings))
-      (v/throw-iae "Functions overloading not supported yet"))
     (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
       (if triple
         (cond (or (= :number tag)
@@ -227,7 +243,7 @@ If functions or symbols are used, provide bindings map
               (= :op tag)
               (recur tokens (take-and-drop (:arity value) stack token))
               (= :function tag)
-              (recur tokens (take-and-drop (bindings token) stack token))
+              (recur tokens (take-and-drop (:arity value) stack token))
               :else (v/throw-iae "Invalid RPN"))
         (first stack))))) ;; Handle stack
 
@@ -240,7 +256,6 @@ If functions or symbols are used, provide bindings map
 ;; DONE Double numbers
 ;; DONE Invalid token
 ;; DONE Unary operations
-;; TODO Unary back
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
@@ -253,7 +268,7 @@ If functions or symbols are used, provide bindings map
 ;;;;;;;;;;;;;;;;;;;;
 ;; Not included ;;;;
 ;;;;;;;;;;;;;;;;;;;;
-;; No unary support
+;; TODO Unary back
 ;; TODO Simplify multiple ops (* (* (* 1 2 3)))
 ;; TODO 2a
 ;; Not supported \\w+ symbols
