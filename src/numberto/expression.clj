@@ -1,6 +1,7 @@
 (ns numberto.expression
   (:require [numberto.math :as m])
   (:require [numberto.validator :as v])
+  (:require [numberto.factorial :as f])
   (:require [clojure.string :as s]))
 
 ;; set to true if you want to track parsing process
@@ -16,8 +17,9 @@
   })
 
 (def unary-table
-  {"-" {:priority 4 :function - :arity 1}
-   "++" {:priority 4 :function inc :arity 1}
+  {"-"   {:priority 4 :function - :arity 1}
+   "++"  {:priority 4 :function inc :arity 1}
+   "!"   {:proprity 5 :function f/! :arity 1}
    })
 
 (defn- parse-error []
@@ -56,12 +58,18 @@
        (validate-tokens expr)))
 
 (defn tag-postprocess [tagged-tokens]
-  (map (fn [[[_ left-tag _] [token tag _ :as e] right]]
+  (map (fn [[[_ left-tag _] [token tag _ :as e] [_ right-tag _]]]
          (if (unary-table token)
                    ;; Processing
                    (cond (or (= :gap left-tag) ;; first token
                              (= :left-paren left-tag)
-                             (= :op left-tag)) [token :unary (unary-table token)]
+                             (= :op left-tag))
+                         [token :unary (unary-table token)]
+                         (or (= :gap right-tag)
+                             (= :symbol left-tag)
+                             (= :number left-tag)
+                             (= :left-paren left-tag))
+                         [token :unary (unary-table token)]
                          :else e)
                    e))
                (partition 3 1 (concat [[nil :gap nil]]
@@ -236,6 +244,8 @@ If functions or symbols are used, provide bindings map
 ;; DONE prefix
 ;; DONE Double numbers
 ;; DONE Invalid token
+;; DONE Unary operations
+;; TODO Unary back
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
@@ -250,8 +260,6 @@ If functions or symbols are used, provide bindings map
 ;;;;;;;;;;;;;;;;;;;;
 ;; No unary support
 ;; TODO Simplify multiple ops (* (* (* 1 2 3)))
-;; TODO Unary operations
-;; TODO Unary back
 ;; TODO 2a
 ;; Not supported \\w+ symbols
 ;; Not supported \\w+ functions
