@@ -19,7 +19,7 @@
 (def unary-table
   {"-"   {:priority 4 :function - :arity 1}
    "++"  {:priority 4 :function inc :arity 1}
-   "!"   {:proprity 5 :function f/! :arity 1}
+   "!"   {:priority 5 :function f/! :arity 1}
    })
 
 (defn- parse-error []
@@ -64,11 +64,6 @@
                    (cond (or (= :gap left-tag) ;; first token
                              (= :left-paren left-tag)
                              (= :op left-tag))
-                         [token :unary (unary-table token)]
-                         (or (= :gap right-tag)
-                             (= :symbol left-tag)
-                             (= :number left-tag)
-                             (= :left-paren left-tag))
                          [token :unary (unary-table token)]
                          :else e)
                    e))
