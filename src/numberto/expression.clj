@@ -244,7 +244,9 @@ If functions or symbols are used, provide bindings map
               (recur tokens (take-and-drop (:arity value) stack token))
               (= :function tag)
               (recur tokens (take-and-drop (:arity value) stack token))
-              :else (v/throw-iae "Invalid RPN"))
+              (= :unary tag)
+              (recur tokens (take-and-drop 1 stack token))
+              :else (v/throw-iae (str "Invalid TOKEN=" triple)))
         (first stack))))) ;; Handle stack
 
 ;; DONE Associativity
@@ -256,14 +258,18 @@ If functions or symbols are used, provide bindings map
 ;; DONE Double numbers
 ;; DONE Invalid token
 ;; DONE Unary operations
+;; DONE arity overloading for functions
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
 ;; TODO clean code
-;; TODO tests
-;; TODO avoid false positives
 ;; TODO Code duplication
-;; Fill with functions
+;; TODO Fill with functions
+
+
+;; TESTS
+;; Simpson Rule
+
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Not included ;;;;
@@ -271,8 +277,8 @@ If functions or symbols are used, provide bindings map
 ;; TODO Unary back
 ;; TODO Simplify multiple ops (* (* (* 1 2 3)))
 ;; TODO 2a
+;; TODO avoid false positives
 ;; Not supported \\w+ symbols
 ;; Not supported \\w+ functions
 ;; Shared place for symbol and function names
-;; No arity overloading for functions
 ;; Bigintegers and Double
