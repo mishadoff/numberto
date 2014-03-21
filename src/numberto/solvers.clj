@@ -14,7 +14,7 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
        (remove empty?)
        (map c/digits->num)))
 
-(defn fill-zeros [n]
+(defn- fill-zeros [n]
   (partial format (str "%0" n "d")))
 
 (defn- splits [numbers]
@@ -29,24 +29,55 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
            (map #({\0 :none \1 :gap} %))
            (binary-split numbers)))))
 
-(defn- permute-ops [split ops]
-  (let [n (count split)]
-    (if (= 1 n) [(str (first split))]
-        (for [i (range (m/power* (count ops) (dec n)))]
-          (->> (str i)
-               (#(c/radix-convert % 10 (count ops)))
-               (biginteger)
-               ((fill-zeros (dec n)))
-               (seq)
-               (map #(ops %))
-               (cons nil)
-               (#(interleave % split))
-               (rest)
-               (apply str))))))
+(defn- reverse-lookup [m]
+  (into {} (map (fn [[a b]] [b a]) m)))
+
+(defn- valid-permute? [code ops rules]
+  (let [reverse-ops (reverse-lookup ops)]
+    (loop [[r & rs] rules res true]
+      (if (false? res)
+        false
+        (if r
+          (condp = (first r) ;; match tags
+            :max
+            (let [[_ op val] r k (reverse-ops op)]
+              (recur rs (<= (count (filter #(= k %) code)) val)))
+            :min
+            (let [[_ op val] r k (reverse-ops op)]
+              (recur rs (>= (count (filter #(= k %) code)) val)))
+            
+            
+            
+            :else (recur rs true)) ;; all rules processed
+          true
+          )))))
+
+(defn- permute-ops [split ops rules]
+  (->> (let [n (count split)]
+         (if (= 1 n) [(str (first split))]
+             (for [i (->> (count ops)
+                          (#(m/power* % (dec n)))
+                          (range))]
+               (let [code (->> (str i)
+                               (#(c/radix-convert % 10 (count ops)))
+                               (biginteger)
+                               ((fill-zeros (dec n)))
+                               (seq))]
+                 (if (valid-permute? code ops rules)
+                   (->> code
+                        (map #(ops %))
+                        (cons nil)
+                        (#(interleave % split))
+                        (rest)
+                        (apply str))
+                   nil))
+               )))
+       (remove nil?)))
 
 (defn solve-insert-ops
-  ([numbers] (solve-insert-ops numbers ["+" "-" "*" "/"]))
-  ([numbers ops]
+  ([numbers]
+     (solve-insert-ops numbers ["+" "-" "*" "/"] []))
+  ([numbers ops rules]
      (let [mapops (->> ops
                        (count)
                        (range 0)
@@ -54,7 +85,7 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
                        (seq)
                        (#(zipmap % ops)))] ;; space used to allow 1op
        (map #(vec [(e/eval-infix %) %])
-            (mapcat #(permute-ops % mapops) (splits numbers))))))
+            (mapcat #(permute-ops % mapops rules) (splits numbers))))))
 
 (defn solve-quadratic [a b c]
   "Solve equation: a*x^2 + b*x + c = 0"
