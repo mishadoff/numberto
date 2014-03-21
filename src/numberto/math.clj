@@ -135,4 +135,3 @@
   "return true if a divisible by b (b|a)"
   (and (not (zero? b))
        (zero? (mod a b))))
-
