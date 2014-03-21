@@ -40,3 +40,7 @@
   ;; TODO false when implement folding
   (is (= "(* (* (* 1 2) 3) 4)" (p "1 * 2 * 3 * 4")))
   )
+
+(deftest infix->prefix-test-formulas
+
+  )
