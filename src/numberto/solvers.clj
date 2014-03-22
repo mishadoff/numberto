@@ -43,30 +43,22 @@ If duplicated vals are present, result undefined"
   (let [reverse-ops (reverse-lookup ops)]
     (loop [[r & rs] rules res true]
       (if (false? res) false
-        (if r (condp = (first r) ;; match tags
-                ;; TODO remove code duplication
-                :max
-                (let [[_ op val] r k (reverse-ops op)]
-                  (recur rs (<= (count (filter #(= k %) code)) val)))
-                :min
-                (let [[_ op val] r k (reverse-ops op)]
-                  (recur rs (>= (count (filter #(= k %) code)) val)))
-                :max-in-a-row
-                (let [[_ op val] r k (reverse-ops op)]
-                  (recur rs (->> (partition-by identity code)
-                                 (filter #(= k (first %)))
-                                 (map count)
-                                 (map #(<= % val))
-                                 (reduce #(and %1 %2) true))))
-                :min-in-a-row
-                (let [[_ op val] r k (reverse-ops op)]
-                  (recur rs (->> (partition-by identity code)
-                                 (filter #(= k (first %)))
-                                 (map count)
-                                 (map #(>= % val))
-                                 (reduce #(and %1 %2) true))))
-                :else (recur rs true))
-            true)))))
+          (if r (condp contains? (first r) ;; match tags
+                  ;; TODO remove code duplication
+                  #{:max :min}
+                  (let [[tag op val] r k (reverse-ops op)]
+                    (recur rs (({:max <= :min >=} tag)
+                               (count (filter #(= k %) code)) val)))
+                  #{:max-in-a-row :min-in-a-row}
+                  (let [[tag op val] r k (reverse-ops op)]
+                    (recur rs (->> (partition-by identity code)
+                                   (filter #(= k (first %)))
+                                   (map count)
+                                   (map #(({:max-in-a-row <=
+                                            :min-in-a-row >=} tag) % val))
+                                   (reduce #(and %1 %2) true))))
+                  :else (recur rs true))
+              true)))))
 
 (defn- permute-ops [split ops rules]
   "Generate all possible combinations of operations for current split"
@@ -105,8 +97,8 @@ If duplicated vals are present, result undefined"
 ;; TODO Tests
 
 ;; Rules
-;; No more than in a row
-;; Use parens
+;; Include ops to rules
+;; Parens
 
 ;; Tough Decisions
 ;; !!!NO UNARY SUPPORT
