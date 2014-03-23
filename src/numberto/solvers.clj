@@ -25,14 +25,15 @@ Example: ((fill-zeros 5) 123) => 00123"
 Example: (splits [1 2 3]) => [[123] [12 3] [1 23] [1 2 3]]"
   (let [n (dec (count numbers))
         limit (m/power* 2 n)]
-    (for [i (range limit)]
-      (->> (str i)
-           (#(c/radix-convert % 10 2))
-           (biginteger)
-           ((fill-zeros n))
-           (seq)
-           (map #({\0 :none \1 :gap} %))
-           (binary-split numbers)))))
+    (if (zero? n) [numbers]
+        (for [i (range limit)]
+          (->> (str i)
+               (#(c/radix-convert % 10 2))
+               (biginteger)
+               ((fill-zeros n))
+               (seq)
+               (map #({\0 :none \1 :gap} %))
+               (binary-split numbers))))))
 
 (defn- reverse-lookup [m]
   "Create a map where keys are vals and vice verca.
@@ -110,6 +111,7 @@ with parens up to desired level. Keep level small."
   ([numbers]
      (solve-insert-ops numbers {}))
   ([numbers conf]
+     (v/validate numbers [#(every? false? (map neg? %)) "numbers mut be non-negative"])
      (let [conf (merge {:ops      ["+" "-" "*" "/"]
                         :parens   0
                         :rules    []} conf)
@@ -119,11 +121,23 @@ with parens up to desired level. Keep level small."
                        (seq)
                        (#(zipmap % (:ops conf))))]
        (v/validate (count (:ops conf)) [#(<= 2 % 9) "Number of operations must be in range [2..9]"])
-       (map #(vec [(e/eval-infix %) %])
-            (mapcat #(permute-ops % mapops conf) (splits numbers))))))
+       (->> (map #(try (let [ei (e/eval-infix %)]
+                         [ei %])
+                       (catch ArithmeticException e nil))
+                 (mapcat #(permute-ops % mapops conf) (splits numbers)))
+            (remove nil?)))))
 
+(defn solve-insert-ops-num
+  "Check whether inserting operations can yield some number [result]"
+  ([numbers result]
+     (solve-insert-ops-num numbers result {}))
+  ([numbers result conf]
+     (->> (solve-insert-ops numbers conf)
+          (filter #(= result (first %))))))
 
-;; TODO Tests
+;; TODO handle 1 number
+;; TODO handle 1 operation
+;; TODO only non-negative numbers supported
 
 (defn solve-polynomial [equation]
   "solve polynomial equation for one variable numerically.
