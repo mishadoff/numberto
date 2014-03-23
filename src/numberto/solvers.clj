@@ -44,7 +44,6 @@ If duplicated vals are present, result undefined"
     (loop [[r & rs] rules res true]
       (if (false? res) false
           (if r (condp contains? (first r) ;; match tags
-                  ;; TODO remove code duplication
                   #{:max :min}
                   (let [[tag op val] r k (reverse-ops op)]
                     (recur rs (({:max <= :min >=} tag)
@@ -60,36 +59,65 @@ If duplicated vals are present, result undefined"
                   :else (recur rs true))
               true)))))
 
-(defn- permute-ops [split ops rules]
+;; TODO duplicates?
+(defn- insert-parens [level expr]
+  "Generate all possible combinations of expression
+with parens up to desired level. Keep level small."
+  (let [cnt (count expr)]
+    (if (or (< cnt 5) (= level 0))
+      nil ;; no way to insert parens
+      (let [subidxs (->> (range (inc cnt))
+                         (partition 4 2)
+                         (map (fn [[a _ _ b]] [a b])))
+            parens-exprs (map (fn [[start end]]
+                                (concat
+                                 (take start expr)
+                                 [(concat ["("]
+                                          (take (- end start)
+                                                (drop start expr))
+                                          [")"])]
+                                 (drop end expr))) subidxs)]
+        (->> parens-exprs
+             (map #(insert-parens (dec level) %))
+             (apply concat parens-exprs)
+             (remove nil?))))))
+
+(defn- permute-ops [split ops conf]
   "Generate all possible combinations of operations for current split"
   (let [n (count split)]
-    (if (= 1 n) [(str (first split))]
-        (for [i (->> (count ops) (#(m/power* % (dec n))) (range))
-              :let [code (->> (str i)
-                              (#(c/radix-convert % 10 (count ops)))
-                              (biginteger)
-                              ((fill-zeros (dec n)))
-                              (seq))]
-              :when (valid-permute? code ops rules)]
-          (->> (map ops code)
-               (cons nil)
-               (#(interleave % split))
-               (rest)
-               (apply str))))))
+    (if (= 1 n) [(str (first split))] ;; TODO check rules for min
+        
+        (flatten
+         (for [i (->> (count ops) (#(m/power* % (dec n))) (range))
+               :let [code (->> (str i)
+                               (#(c/radix-convert % 10 (count ops)))
+                               (biginteger)
+                               ((fill-zeros (dec n)))
+                               (seq))]
+               :when (valid-permute? code ops (:rules conf))]
+           (->> (map ops code)
+                (cons nil)
+                (#(interleave % split))
+                (rest)
+                (#(cons % (insert-parens (:parens conf) %)))
+                (map flatten)
+                (map #(apply str %))))))))
 
 (defn solve-insert-ops
   "Find all possible values which could be obtained
  by inserting math operations between numbers"
   ([numbers]
-     (solve-insert-ops numbers ["+" "-" "*" "/"] []))
-  ([numbers ops rules]
-     (let [mapops (->> (count ops)
+     (solve-insert-ops numbers {:ops      ["+" "-" "*" "/"]
+                                :parens   0
+                                :rules    []}))
+  ([numbers conf]
+     (let [mapops (->> (count (:ops conf))
                        (range 0)
                        (apply str)
                        (seq)
-                       (#(zipmap % ops)))]
+                       (#(zipmap % (:ops conf))))]
        (map #(vec [(e/eval-infix %) %])
-            (mapcat #(permute-ops % mapops rules) (splits numbers))))))
+            (mapcat #(permute-ops % mapops conf) (splits numbers))))))
 
 
 ;; TODO validation 10 ops maximum 2 minimum
@@ -102,21 +130,6 @@ If duplicated vals are present, result undefined"
 
 ;; Tough Decisions
 ;; !!!NO UNARY SUPPORT
-
-;; Linear Diphontine: ax + by = 1
-;; Pythagorean triples: x^2 + y^2 = z^2
-;; Pell's equation: x^2 - n*y^2 = +-1
-;; Polynomial solver
-
-;; TODO deprecated, make common solve polynomials
-(defn solve-quadratic [a b c]
-  "Solve equation: a*x^2 + b*x + c = 0"
-  (let [d (- (* b b) (* 4 a c))]
-    (cond
-     (zero? d) [(/ (- b) (* 2 a))]
-     (pos? d) [(/ (- (- b) (Math/sqrt d)) (* 2 a))
-               (/ (+ (- b) (Math/sqrt d)) (* 2 a))]
-     :else [])))
 
 (defn solve-polynomial [equation]
   "solve polynomial equation for one variable numerically.
