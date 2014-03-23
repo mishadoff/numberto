@@ -1,7 +1,8 @@
 (ns numberto.solvers
   (:require [numberto.converters :as c])
   (:require [numberto.expression :as e])
-  (:require [numberto.math :as m]))
+  (:require [numberto.validator  :as v])
+  (:require [numberto.math       :as m]))
 
 (defn- binary-split [numbers code]
   "Build splits from numbers and binary code indicates gaps
@@ -107,29 +108,22 @@ with parens up to desired level. Keep level small."
   "Find all possible values which could be obtained
  by inserting math operations between numbers"
   ([numbers]
-     (solve-insert-ops numbers {:ops      ["+" "-" "*" "/"]
-                                :parens   0
-                                :rules    []}))
+     (solve-insert-ops numbers {}))
   ([numbers conf]
-     (let [mapops (->> (count (:ops conf))
+     (let [conf (merge {:ops      ["+" "-" "*" "/"]
+                        :parens   0
+                        :rules    []} conf)
+           mapops (->> (count (:ops conf))
                        (range 0)
                        (apply str)
                        (seq)
                        (#(zipmap % (:ops conf))))]
+       (v/validate (count (:ops conf)) [#(<= 2 % 9) "Number of operations must be in range [2..9]"])
        (map #(vec [(e/eval-infix %) %])
             (mapcat #(permute-ops % mapops conf) (splits numbers))))))
 
 
-;; TODO validation 10 ops maximum 2 minimum
-;; TODO Parens mode
 ;; TODO Tests
-
-;; Rules
-;; Include ops to rules
-;; Parens
-
-;; Tough Decisions
-;; !!!NO UNARY SUPPORT
 
 (defn solve-polynomial [equation]
   "solve polynomial equation for one variable numerically.
