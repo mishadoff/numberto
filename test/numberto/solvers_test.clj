@@ -27,6 +27,4 @@
   (is (= [[1 "1+0"] [1 "1-0"]] (sin [1 0] 1)))
   (is (= [[100 "100"]] (sin [100] 100)))
   (is (= [[1 "1+0"]] (sin [1 0] 1 {:ops ["+" "*"]})))
-  (is (thrown? IllegalArgumentException (si [-1 1])))
-  
-  )
+  (is (thrown? IllegalArgumentException (si [-1 1]))))

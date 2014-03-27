@@ -58,7 +58,7 @@ If duplicated vals are present, result undefined"
                                    (map #(({:max-in-a-row <=
                                             :min-in-a-row >=} tag) % val))
                                    (reduce #(and %1 %2) true))))
-                  :else (recur rs true))
+                  (recur rs true))
               true)))))
 
 ;; TODO duplicates?
@@ -134,16 +134,3 @@ with parens up to desired level. Keep level small."
   ([numbers result conf]
      (->> (solve-insert-ops numbers conf)
           (filter #(= result (first %))))))
-
-;; TODO handle 1 number
-;; TODO handle 1 operation
-;; TODO only non-negative numbers supported
-
-(defn solve-polynomial [equation]
-  "solve polynomial equation for one variable numerically.
-   real and complex roots returned
-   equation must be like 10*x^4 +20*x^3 + ... + = 0
-"
-  ;; Detect max degree
-  ;; Apply some numeric method
-  )
