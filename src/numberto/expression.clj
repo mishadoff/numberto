@@ -9,15 +9,15 @@
 
 (def configuration
   {:binary-ops
-   {"+"   {:priority 1 :function + :assoc :left :arity 2}
-    "-"   {:priority 1 :function - :assoc :left :arity 2}
-    "*"   {:priority 2 :function * :assoc :left :arity 2}
-    "/"   {:priority 2 :function / :assoc :left :arity 2}
-    "^"   {:priority 3 :function m/power* :assoc :right :arity 2}
-    "**"  {:priority 3 :function m/power* :assoc :right :arity 2}}
+   {"+"   {:priority 1 :function + :assoc :left}
+    "-"   {:priority 1 :function - :assoc :left}
+    "*"   {:priority 2 :function * :assoc :left}
+    "/"   {:priority 2 :function / :assoc :left}
+    "^"   {:priority 3 :function m/power* :assoc :right}
+    "**"  {:priority 3 :function m/power* :assoc :right}}
 
    :unary-ops
-   {"-"   {:priority 4 :function - :arity 1}}
+   {"-"   {:priority 4 :function -}}
 
    :bindings
    {;; Functions
@@ -71,13 +71,13 @@
        (validate-tokens expr)))
 
 (defn tag-postprocess [tagged-tokens {:keys [unary-ops]}]
-  (map (fn [[[_ left-tag _] [token tag _ :as e] [_ right-tag _]]]
-         (cond (unary-ops token)
+  (map (fn [[[_ left-tag _] [token tag v :as e] [_ right-tag _]]]
+         (cond (unary-ops token) ;; to resolve ambiguities between unary and binary
                ;; Processing
                (cond (or (= :gap left-tag) ;; first token
                          (= :left-paren left-tag)
-                         (= :op left-tag))
-                     [token :unary (unary-ops token)]
+                         (= :binary left-tag))
+                     [token :unary (assoc (unary-ops token) :arity 1)]
                      :else e)
                :else e))
        (partition 3 1 (concat [[nil :gap nil]]
@@ -98,8 +98,8 @@ Returns the triple [original value, tag, real value+meta]"
                (= "(" token) [token :left-paren \(]
                (= ")" token) [token :right-paren \)]
                (= "," token) [token :arg-separator \,]
-               (binary-ops token) [token :op (binary-ops token)]
-               (unary-ops token) [token :op (unary-ops token)]
+               (binary-ops token) [token :binary (assoc (binary-ops token) :arity 2)]
+               (unary-ops token) [token :unary (assoc (unary-ops token) :arity 1)]
                (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
                (if (= "(" right) [token :function token] [token :symbol token])
                :else (token-error token)))
@@ -153,18 +153,15 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
             #{:function}
             (recur (inc p) output (conj opstack triple) (conj funstack [op1 1]) arity)
 
-            #{:op}
+            #{:unary :left-paren}
+            (recur (inc p) output (conj opstack triple) funstack arity)
+            
+            #{:binary}
             (let [[op2 _ _ :as all2] (peek opstack) props2 (binary-ops op2)
                   [p1 p2] (map :priority [props props2])]
               (if (and props2 (or (< p1 p2) (and (= :left (:assoc props)) (= p1 p2))))
                 (recur p (conj output all2) (pop opstack) funstack arity)
                 (recur (inc p) output (conj opstack triple) funstack arity)))
-            
-            #{:unary}
-            (recur (inc p) output (conj opstack triple) funstack arity)
-
-            #{:left-paren}
-            (recur (inc p) output (conj opstack triple) funstack arity)
             
             #{:right-paren}
             (let [[op2 tag2 _ :as all2] (peek opstack)]
@@ -182,27 +179,32 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
 
 (defn- eval-postfix [postfix bindings]
   "Evaluates postfix expression. 1 2 + => 3"
-  (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
-    (if triple
-      (cond (= :number tag) (recur tokens (conj stack value))
-            (= :symbol tag)
-            (let [value (bindings token)]
-              (if-not value (eval-error token))
-              (recur tokens (conj stack (bindings token))))
-            (= :op tag) (recur tokens (conj (drop 2 stack)
-                                            (apply (:function value) (reverse (take 2 stack)))))
-            (= :unary tag) (recur tokens (conj (drop 1 stack)
-                                               (apply (:function value) (reverse (take 1 stack)))))
-            (= :function tag)
-            (let [f (bindings token) arity (:arity value)]
-              (if-not f (eval-error token))
-              (recur tokens (conj (drop arity stack)
-                                  (apply f (reverse (take arity stack))))))
-            :else (v/throw-iae "Invalid RPN"))
-      (first stack)))) ;; more in stack?
+  (let [take-and-drop (fn [n stack f]
+                           (->> (take n stack)
+                                (reverse)
+                                (apply f)
+                                (conj (drop n stack))))]
+    (loop [[[token tag {:keys [arity function] :as value} :as triple] & tokens] postfix stack (list)]
+      (if triple
+        (condp contains? tag
+          #{:number}
+          (recur tokens (conj stack value))
+          #{:symbol}
+          (let [value (bindings token)]
+            (if-not value (eval-error token))
+            (recur tokens (conj stack (bindings token))))
+          #{:binary :unary}
+          (recur tokens (take-and-drop arity stack function))
+          #{:function}
+          (let [f (bindings token) arity (:arity value)]
+            (if-not f (eval-error token))
+            (recur tokens (take-and-drop arity stack f)))
+
+          (v/throw-iae "Invalid RPN"))
+        (first stack))))) ;; more in stack?
   
-(defn eval-infix 
-  "Evaluate infix expression.
+  (defn eval-infix 
+    "Evaluate infix expression.
 If functions or symbols are used, provide bindings map"
   ([expr]
      (eval-infix expr configuration))
@@ -227,16 +229,13 @@ If functions or symbols are used, provide bindings map"
                                 (conj (drop n stack))))]
        (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
          (if triple
-           (cond (or (= :number tag)
-                     (= :symbol tag))
-                 (recur tokens (conj stack token))
-                 (= :op tag)
-                 (recur tokens (take-and-drop (:arity value) stack token))
-                 (= :function tag)
-                 (recur tokens (take-and-drop (:arity value) stack token))
-                 (= :unary tag)
-                 (recur tokens (take-and-drop 1 stack token))
-                 :else (v/throw-iae (str "Invalid TOKEN=" triple)))
+           (condp contains? tag
+             #{:number :symbol}
+             (recur tokens (conj stack token))
+             #{:binary :unary :function}
+             (recur tokens (take-and-drop (:arity value) stack token))
+
+             (v/throw-iae (str "Invalid TOKEN=" triple)))
            (first stack)))))) ;; Handle stack
 
 ;; TODO infix errors
@@ -244,8 +243,6 @@ If functions or symbols are used, provide bindings map"
 ;; TODO unbalanced parens
 ;; TODO clean code
 ;; TODO Code duplication
-;; TODO Extract everything to conf
-;; TODO Debug
 
 ;; TESTS
 ;; Simpson Rule

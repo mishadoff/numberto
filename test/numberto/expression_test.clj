@@ -24,8 +24,8 @@
 
 (deftest eval-infix-bindings-test
   (is (= 120 (e "factorial(5)"
-                {"factorial" #(reduce * (range 1 (inc %)))})))
-  (is (= 3 (e "a+b" {"a" 1 "b" 2})))
+                {:bindings {"factorial" #(reduce * (range 1 (inc %)))}})))
+  (is (= 3 (e "a+b" {:bindings {"a" 1 "b" 2}})))
   )
 
 
