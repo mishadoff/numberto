@@ -3,8 +3,19 @@
 Lein dependency
 
 ```
-[numberto "0.0.2"]
+[numberto "0.0.3"]
 ```
+
+* [Converters](#Converters)
+* [Math](#Math)
+* [Factorial](#Factorial)
+* [Seqs](#Seqs)
+* [Primes](#Primes)
+* [Printers](#Printers)
+* [Generators](#Generators)
+* [Irrational](#Irrational)
+* [Expressions](#Expressions)
+* [Solvers](#Solvers)
 
 ### Converters
 
@@ -36,6 +47,13 @@ or char sequence
 (map digit->char [1 2 3 4 5]) => (\1 \2 \3 \4 \5)
 ```
 
+Handle conversion between different radix
+
+``` clojure
+(radix-convert "100" 10 2) => "1100100"
+(radix-convert "ff" 16 10) => "255"
+```
+
 Need a roman numbers?
 
 ``` clojure
@@ -55,6 +73,7 @@ Math namespace provides functions to perform number manipulations
 ``` clojure
 (count-digits 123456789) => 9
 (sum-of-digits 123456789) => 45
+(sum-of-digits-recur 123456789) => 9
 (reverse-num 123456789) => 987654321
 (shift-left 123456789 3) => 456789123
 (shift-right 123456789 3) => 789123456
@@ -112,12 +131,14 @@ There is also a factorial version `!!` optimized for big numbers.
 
 ### Seqs
 
+`(:use [numberto.seqs])`
+
 Lazy sequences are good composable objects. Always cut results before output.
 
 ``` clojure
 (take 10 naturals) => (1 2 3 4 5 6 7 8 9 10)
 (take 10 squares) => (1 4 9 16 25 36 49 64 81 100)
-(take 10 powers-of-two) => (1 2 4 8 16 32 64 128 256 512)
+(take 10 (powers-of 2)) => (1 2 4 8 16 32 64 128 256 512)
 (take 10 triangles) => (1 3 6 10 15 21 28 36 45 55)
 ```
 
@@ -132,6 +153,7 @@ Some are not very popular
 ``` clojure
 (take 10 (continued-fraction-sqroot 3)) => (1 1 2 1 2 1 2 1 2 1)
 (take 10 (farey 5)) => ([0 1] [1 5] [1 4] [1 3] [2 5] [1 2] [3 5] [2 3] [3 4] [4 5])
+(take 10 (collatz 5)) => [5 16 8 4 2 1]
 ```
 
 Palindromic sequence. Instead of iterating all numbers and filter out
@@ -201,6 +223,14 @@ twenty three trillion seven hundred fifty seven billion two hundred thirty four 
 seven hundred eighty one thousand two hundred sixty four"
 ```
 
+Ratio numbers presented as `p/q` in clojure, but sometimes
+needed to see digits after period. `(double 22/7)` can't handle this, use `format-ratio`
+
+``` clojure
+(double 22/7) => 3.142857142857143
+(format-ratio 22/7 30) => "3.14285714285714285714285714285"
+```
+
 ### Generators
 
 `(:use [numberto.generators])`
@@ -217,5 +247,196 @@ A random number with 10 digits?
 (rand-number 10) => 9026455947
 ```
 
+A random number below n? (*rand-int not able to handle bigints*)
+
+``` clojure
+(rand-bigint 12345678901234567890) => 5957548380330372271
+```
+
+### Irrational
+
+`(:use [numberto.irational])`
+
+What are digits of PI? `Math/PI` gives us only 15 digits.
+
+``` clojure
+Math/PI => 3.141592653589793
+(pi) => "3.141592653589793"
+(pi :iterations 1000 :limit 50) =>
+"3.1415926535897932384626433832795028841971693993751"
+```
+
+The same functionality available for `e` and `sqrt n`
+
+``` clojure
+(e :iterations 100 :limit 50) =>
+"2.7182818284590452353602874713526624977572470936999"
+
+(sqrt 2 :iterations 100 :limit 50) =>
+"1.4142135623730950488016887242096980785696718753769"
+```
+
+### Expressions
+
+`(:use [numberto.expressions])`
+
+Expressions package provides capability to evaluate infix
+expression `eval-infix` and convert it to prefix lisp-style form `infix->prefix`
+
+Let's give aliases to these operations
+
+``` clojure
+(def e eval-infix)
+(def p infix->prefix)
+```
+
+So, to evaluate simple math expressions feed it with string
+
+``` clojure
+(e "1+2") => 3
+```
+
+or more complex
+
+``` clojure
+(e "1+2*(3-4/2)") => 3
+```
+
+handle priorities
+
+``` clojure
+(e "2+2*2") => 6
+```
+
+and left/right associativity
+
+``` clojure
+(e "1024/2/2/2/2") => 64
+(e "2^3^4") => 2417851639229258349412352N
+```
+
+Oh, what's this? Long numbers? Sure, ratios and floats supported as well
+
+``` clojure
+(e "1/3") => 1/3
+(e "1.1/0.9") => 1.2222222222222223
+```
+
+Unary operations
+
+``` clojure
+(e "(-1)^100") => 1
+```
+
+functions and symbols
+
+``` clojure
+(e "sin(e) + sqrt(pi)") => 2.183235141408425
+```
+
+vararg functions
+
+``` clojure
+(e "sum(1,2,3,sum())/max(1,2)") => 3
+```
+
+You can also provide custom bindings for
+unknown functions and symbols
+
+``` clojure
+(e "factorial(n)/20"
+   {:bindings
+     {"factorial" #(reduce *' (range 1 (inc %)))
+      "n" 10}})
+=> 181440
+```
+
+Worth to mention that you can easily redefine existing
+or define your own new unary, binary operations, functions
+and symbols. Just add additional properties to `eval-infix`
+
+``` clojure
+;; return current time in millis
+(e "now()" {:bindings {"now" #(.getTime (java.util.Date.))}}) => some long number
+;; override priorities
+(e "1+2*3" {:binary-ops {"+" {:function + :priority 100}}}) => 9
+```
+
+`infix->prefix` has exactly the same functionality, but it builds prefix expression instead.
+
+``` clojure
+(infix->prefix "(1+2)*3-(4/avg(3,5)-sum(1))")
+=>
+"(- (* (+ 1 2) 3) (- (/ 4 (avg 3 5)) (sum 1)))"
+```
+
+It can be useful if you googled some formula but bored to translate it manually to clojure.
+
+For example, take the [Simpson's rule](http://en.wikipedia.org/wiki/Simpson%27s_rule)
+
+![](http://upload.wikimedia.org/math/1/a/0/1a0fb4456375307fdde8ab85954d95be.png)
+
+``` clojure
+(infix->prefix "(b-a)/6*(f(a)+4*f((a+b)/2)+f(b))")
+=>
+"(* (/ (- b a) 6) (+ (+ (f a) (* 4 (f (/ (+ a b) 2)))) (f b)))"
+```
+
+### Solvers
+
+`(:use [numberto.solvers])`
+
+Here is the puzzle:
+
+> You have four numbers [3, 4, 5, 6].  
+> You have four binary operations [+, -, *, /] and parentheses ()
+>
+> How to insert operations between numbers to get number 42?
+
+Hah, that simple `3*4 + 5*6 = 42`
+
+Ok, get `42`, but you forced to use one division `/`.
+
+Not so obvious?
+
+```
+(solve-insert-ops-num [3 4 5 6] 42) =>
+([42N "3+45-6"] [42N "3/4*56"] [42N "3*4+5*6"])
+```
+
+If you use `solve-insert-ops` function it gives all possible values can be obtained by inserting operations between numbers.
+
+``` clojure
+(solve-insert-ops [3 4 5 6]) => ;; long list
+```
+
+Default implementation uses 4 basic operations, no parenthesisand no restrictions. Instead, you can override options
+
+to use parens, specify level
+
+``` clojure
+(solve-insert-ops-num [3 4 5 6] 42 {:parens 1}) =>
+([42N "3+45-6"] [42N "(3+45)-6"] [42N "3+(45-6)"] [42N "3/4*56"] [42N "(3/4)*56"] [42N "3/(4/56)"] [42N "3*4+5*6"] [42N "(3*4)+5*6"] [42N "3*4+(5*6)"])
+```
+
+limit some operations
+
+``` clojure
+(solve-insert-ops-num [3 4 5 6] 42 {:rules [[:max "*" 1]]}) =>
+([42N "3+45-6"] [42N "3/4*56"])
+```
+
+`:max`, `:min`, `:max-in-a-row`, `:min` options are supported.
+
+Add new operations (supported by expressions package)
+
+``` clojure
+(solve-insert-ops-num [3 4 5 6] 80
+                      {:ops ["+" "-" "*" "/" "^"]
+					   :rules [[:max "^" 1]]}) =>
+([80N "3^4+5-6"])
+```
+
+Keep in mind, always limit time consuming operations (*like* `^`) as it building all permutations and you can wait your answer forever.
 
 **Note:** Almost all number functions assuming bigint, and not optimized for areas where performace is critical.

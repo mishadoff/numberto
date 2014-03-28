@@ -97,8 +97,5 @@
              "1 2 3 4 + -+", "()"
              "+3", "-", "1007001^"
              "1 2 - 3", "6*7*7**"
-             "avg(1,)", "2^(+12)"
-             ]]
-    (is (thrown? IllegalArgumentException (e i)))
-    )
-  )
+             "avg(1,)", "2^(+12)"]]
+    (is (thrown? IllegalArgumentException (e i)))))

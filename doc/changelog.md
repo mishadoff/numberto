@@ -1,5 +1,18 @@
 # Changelog
 
+### 0.0.3
+
+* Expressions package. Eval infix expression and build prefix.
+* Solvers package. Solve puzzles "insert operations between numbers to get another number"
+* Primes predicates `amicable?`, `perfect?`, `abundant?`.
+* Radix converter
+* Few math package functions improvements
+* Generators: `rand-bigint` as standard `rand-int` but for big numbers
+* Couple of new sequences `n-gonals`, `collatz`, `farey`, `fermat-numbers`, `powers-of`
+* Printers: `format-ratio` to print rational numbers
+* Irrational: calculate digits of `pi`, `e` and `sqrt(n)`
+* Validator improved
+
 ### 0.0.2
 
 * New namespace `printers` which allow to print long numbers
