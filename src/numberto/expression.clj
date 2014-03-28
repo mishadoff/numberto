@@ -15,13 +15,13 @@
     "/"   {:priority 20 :function / :assoc :left}
     "^"   {:priority 30 :function m/power* :assoc :right}
     "**"  {:priority 30 :function m/power* :assoc :right}}
-
+   
    :unary-ops
    {"-"   {:function -}}
-
+   
    :bindings
    {;; Functions
-    "cos"       #(Math/cos %)        
+    "cos"       #(Math/cos %)
     "sin"       #(Math/sin %)
     "sum"       #(m/sum %&) 
     "max"       max
@@ -43,6 +43,9 @@
 
 (defn- token-error [tokens]
   (v/throw-iae (str "Cannot tokenize symbols " tokens)))
+
+(defn- popstack [stack]
+  (if (= 1 (count stack)) (first stack) (parse-error)))
 
 (def ^:private regexp-esc-map
   "regexp escape map"
@@ -193,6 +196,7 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
   "Evaluates postfix expression. 1 2 + => 3"
   (let [take-and-drop (fn [n stack f]
                         (->> (take n stack)
+                             (#(if-not (= n (count %)) (parse-error) %))
                              (reverse)
                              (apply f)
                              (conj (drop n stack))))]
@@ -213,7 +217,7 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
             (recur tokens (take-and-drop arity stack f)))
 
           (v/throw-iae "Invalid RPN"))
-        (first stack))))) ;; more in stack?
+        (popstack stack))))) ;; more in stack?
 
 (defn eval-infix 
   "Evaluate infix expression.
@@ -234,6 +238,7 @@ If functions or symbols are used, provide bindings map"
            postfix (infix->postfix expr conf)
            take-and-drop (fn [n stack token]
                            (->> (take n stack)
+                                (#(if-not (= n (count %)) (parse-error) %))
                                 (reverse)
                                 (interpose " ")
                                 (apply str)
@@ -248,12 +253,4 @@ If functions or symbols are used, provide bindings map"
              (recur tokens (take-and-drop (:arity value) stack token))
 
              (v/throw-iae (str "Invalid TOKEN=" triple)))
-           (first stack)))))) ;;handle stack
-
-;; TODO infix errors
-;; TODO rpn errors
-;; TODO unbalanced parens
-;; TODO no more tokens in stack
-;; TODO non-empty stack
-;; TODO pow floats
-;; TODO 2a+3
+           (popstack stack))))))
