@@ -9,15 +9,15 @@
 
 (def configuration
   {:binary-ops
-   {"+"   {:priority 1 :function + :assoc :left}
-    "-"   {:priority 1 :function - :assoc :left}
-    "*"   {:priority 2 :function * :assoc :left}
-    "/"   {:priority 2 :function / :assoc :left}
-    "^"   {:priority 3 :function m/power* :assoc :right}
-    "**"  {:priority 3 :function m/power* :assoc :right}}
+   {"+"   {:priority 10 :function + :assoc :left}
+    "-"   {:priority 10 :function - :assoc :left}
+    "*"   {:priority 20 :function * :assoc :left}
+    "/"   {:priority 20 :function / :assoc :left}
+    "^"   {:priority 30 :function m/power* :assoc :right}
+    "**"  {:priority 30 :function m/power* :assoc :right}}
 
    :unary-ops
-   {"-"   {:priority 4 :function -}}
+   {"-"   {:priority 40 :function -}}
 
    :bindings
    {;; Functions
@@ -163,6 +163,15 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
                 (recur p (conj output all2) (pop opstack) funstack arity)
                 (recur (inc p) output (conj opstack triple) funstack arity)))
             
+            #{:arg-separator}
+            (let [[op2 tag2 _ :as all2] (peek opstack)
+                  [f ar] (peek funstack)
+                  new-funstack (conj (pop funstack) [f (inc ar)])]
+              (when-not all2 (parse-error)) ;; empty stack
+              (if (= :left-paren tag2)
+                (recur (inc p) output opstack new-funstack arity)
+                (recur p (conj output all2) (pop opstack) funstack arity)))
+            
             #{:right-paren}
             (let [[op2 tag2 _ :as all2] (peek opstack)]
               (when-not all2 (parse-error))
@@ -180,10 +189,10 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
 (defn- eval-postfix [postfix bindings]
   "Evaluates postfix expression. 1 2 + => 3"
   (let [take-and-drop (fn [n stack f]
-                           (->> (take n stack)
-                                (reverse)
-                                (apply f)
-                                (conj (drop n stack))))]
+                        (->> (take n stack)
+                             (reverse)
+                             (apply f)
+                             (conj (drop n stack))))]
     (loop [[[token tag {:keys [arity function] :as value} :as triple] & tokens] postfix stack (list)]
       (if triple
         (condp contains? tag
@@ -202,14 +211,15 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
 
           (v/throw-iae "Invalid RPN"))
         (first stack))))) ;; more in stack?
-  
-  (defn eval-infix 
-    "Evaluate infix expression.
+
+(defn eval-infix 
+  "Evaluate infix expression.
 If functions or symbols are used, provide bindings map"
   ([expr]
      (eval-infix expr configuration))
   ([expr bindings]
-     (let [conf (merge configuration bindings)]
+     (let [conf (merge-with merge configuration bindings)]
+       (println conf)
        (eval-postfix (infix->postfix expr conf) (:bindings conf)))))
 
 (defn infix->prefix 
@@ -218,14 +228,14 @@ If functions or symbols are used, provide bindings map"
   ([expr]
      (infix->prefix expr configuration))
   ([expr conf]
-     (let [conf (merge configuration conf)
+     (let [conf (merge-with merge configuration conf)
            postfix (infix->postfix expr conf)
            take-and-drop (fn [n stack token]
                            (->> (take n stack)
                                 (reverse)
                                 (interpose " ")
                                 (apply str)
-                                (#(str "(" token " " % ")"))
+                                (#(str "(" token (if (pos? n) " " "") % ")")) ;; handle no arg functions
                                 (conj (drop n stack))))]
        (loop [[[token tag value :as triple] & tokens] postfix stack (list)]
          (if triple
@@ -236,13 +246,11 @@ If functions or symbols are used, provide bindings map"
              (recur tokens (take-and-drop (:arity value) stack token))
 
              (v/throw-iae (str "Invalid TOKEN=" triple)))
-           (first stack)))))) ;; Handle stack
+           (first stack)))))) ;;handle stack
 
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
-;; TODO clean code
-;; TODO Code duplication
 
 ;; TESTS
 ;; Simpson Rule
