@@ -1,4 +1,4 @@
-(defproject numberto "0.0.2"
+(defproject numberto "0.0.3"
   :description "numberto - all you need to play with numbers"
   :url "https://github.com/mishadoff/numberto"
   :license {:name "Eclipse Public License"

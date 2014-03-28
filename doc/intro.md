@@ -426,7 +426,7 @@ limit some operations
 ([42N "3+45-6"] [42N "3/4*56"])
 ```
 
-`:max`, `:min`, `:max-in-a-row`, `:min` options are supported.
+`:max`, `:min`, `:max-in-a-row`, `:min-in-a-row` options are supported.
 
 Add new operations (supported by expressions package)
 
