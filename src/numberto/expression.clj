@@ -17,11 +17,11 @@
     "**"  {:priority 30 :function m/power* :assoc :right}}
 
    :unary-ops
-   {"-"   {:priority 40 :function -}}
+   {"-"   {:function -}}
 
    :bindings
    {;; Functions
-    "cos"       #(Math/cos %)
+    "cos"       #(Math/cos %)        
     "sin"       #(Math/sin %)
     "sum"       #(m/sum %&) 
     "max"       max
@@ -158,8 +158,11 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
             
             #{:binary}
             (let [[op2 _ _ :as all2] (peek opstack) props2 (binary-ops op2)
-                  [p1 p2] (map :priority [props props2])]
-              (if (and props2 (or (< p1 p2) (and (= :left (:assoc props)) (= p1 p2))))
+                  [p1 p2] (map #(get % :priority 1) [props props2])] ;; 1 is default priority
+              (if (and props2
+                       (or (< p1 p2)
+                           (and (= :left (get props :assoc :left)) ;; :left is default associativity
+                                (= p1 p2))))
                 (recur p (conj output all2) (pop opstack) funstack arity)
                 (recur (inc p) output (conj opstack triple) funstack arity)))
             
@@ -219,7 +222,6 @@ If functions or symbols are used, provide bindings map"
      (eval-infix expr configuration))
   ([expr bindings]
      (let [conf (merge-with merge configuration bindings)]
-       (println conf)
        (eval-postfix (infix->postfix expr conf) (:bindings conf)))))
 
 (defn infix->prefix 
@@ -251,6 +253,7 @@ If functions or symbols are used, provide bindings map"
 ;; TODO infix errors
 ;; TODO rpn errors
 ;; TODO unbalanced parens
-
-;; TESTS
-;; Simpson Rule
+;; TODO no more tokens in stack
+;; TODO non-empty stack
+;; TODO pow floats
+;; TODO 2a+3
