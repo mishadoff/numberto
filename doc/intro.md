@@ -6,16 +6,16 @@ Lein dependency
 [numberto "0.0.3"]
 ```
 
-* [Converters](#Converters)
-* [Math](#Math)
-* [Factorial](#Factorial)
-* [Seqs](#Seqs)
-* [Primes](#Primes)
-* [Printers](#Printers)
-* [Generators](#Generators)
-* [Irrational](#Irrational)
-* [Expressions](#Expressions)
-* [Solvers](#Solvers)
+* [Converters](#converters)
+* [Math](#math)
+* [Factorial](#factorial)
+* [Seqs](#seqs)
+* [Primes](#primes)
+* [Printers](#printers)
+* [Generators](#generators)
+* [Irrational](#irrational)
+* [Expressions](#expressions)
+* [Solvers](#solvers)
 
 ### Converters
 
