@@ -1,6 +1,6 @@
 (ns numberto.factorial-test
-  (:use [clojure.test])
-  (:require [numberto.factorial :as f]))
+  (:require [clojure.test :refer :all]
+            [numberto.factorial :as f]))
 
 (deftest !-test
   (doseq [! [f/! f/!!]] 

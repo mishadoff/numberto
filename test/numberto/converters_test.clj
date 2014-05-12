@@ -1,6 +1,6 @@
 (ns numberto.converters-test
-  (:use [clojure.test])
-  (:require [numberto.converters :as c]))
+  (:require [clojure.test :refer :all]
+            [numberto.converters :as c]))
 
 (deftest digit?-test
   (is (every? c/digit? [0 1 2 3 4 5 6 7 8 9]))
@@ -28,7 +28,7 @@
 (deftest digits->num-test
   (is (= 123 (c/digits->num [1 2 3])))
   (is (= 999N (c/digits->num [9 9N 9])))
-  (is (= 1223445 ) (c/digits->num [1 2 2 3 4 4 5]))
+  (is (= 1223445 (c/digits->num [1 2 2 3 4 4 5])))
   (is (thrown? IllegalArgumentException (c/digits->num [1 2 "3"])))
   (is (thrown? IllegalArgumentException (c/digits->num ["99N"]))))
 

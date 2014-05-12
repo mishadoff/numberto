@@ -1,6 +1,6 @@
 (ns numberto.math-test
-  (:use [clojure.test])
-  (:require [numberto.math :as m]))
+  (:require [clojure.test :refer :all]
+            [numberto.math :as m]))
 
 (deftest constants-test
   (is (= m/PI Math/PI))

@@ -1,6 +1,6 @@
 (ns numberto.primes-test
-  (:use [clojure.test])
-  (:require [numberto.primes :as p]))
+  (:require [clojure.test :refer :all]
+            [numberto.primes :as p]))
 
 (deftest primes-test
   (is (= 2 (first (p/primes))))

@@ -20,8 +20,9 @@
               (apply str (drop (- n e) num-seq)))
          (str num)))))
 
-(defn format-ratio [ratio limit]
+(defn format-ratio 
   "Print ratio number with limit accuracy"
+  [ratio limit]
   ;; TODO tests
   (v/validate ratio :number)
   (v/validate limit :integer)
@@ -56,9 +57,10 @@
    29 "octovigintillion" 30 "novemvigintillion" 31 "trigintillion"
    32 "untrigintillion" 33 "duotrigintillion"})
 
-(defn number-name [num]
+(defn number-name 
   "Convert number to english word representation. 
    10^102 max number supported."
+  [num]
   (v/validate num :integer #(< (m/count-digits %) 102))
   (letfn [(closest [num]
             (->> (keys number-names)
@@ -91,4 +93,3 @@
          (remove nil?)
          (interpose " ")
          (apply str))))
-  

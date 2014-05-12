@@ -7,18 +7,20 @@
 ;; "Gimme E, Gimme PI, Gimme that which I desire"
 ;; -- Metallica, Fuel
 
-(defn e [& {:keys [iterations limit] 
-            :or {iterations 100 limit 16}}]
+(defn e 
   "Expansion of formula 1 + E(1/n!)"
+  [& {:keys [iterations limit] 
+      :or {iterations 100 limit 16}}]
   (->> (range 1 (inc iterations))
        (reductions *')
        (map #(/ 1 %))
        (reduce +' 1)
        (#(p/format-ratio % limit))))
 
-(defn pi [& {:keys [iterations limit] 
-             :or {iterations 100 limit 16}}]
+(defn pi 
   "Calculate PI by Rabinowitz algorithm"
+  [& {:keys [iterations limit] 
+      :or {iterations 100 limit 16}}]
   (->> (range 1 (inc iterations))
        (map #(/ (m/product (take %1 s/naturals))
                 (m/product (take %1 (filter odd? s/naturals)))))
@@ -28,9 +30,10 @@
        (dec)
        (#(p/format-ratio % limit))))
 
-(defn sqrt [num & {:keys [iterations limit] 
-                   :or {iterations 100 limit 16}}]
+(defn sqrt 
   "Calculate sqroot by continued fraction"
+  [num & {:keys [iterations limit] 
+          :or {iterations 100 limit 16}}]
   (v/validate num :integer :positive)
   (->> (s/continued-fraction-sqroot num)
        (take iterations)

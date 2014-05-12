@@ -1,6 +1,6 @@
 (ns numberto.solvers-test
-  (:use [clojure.test])
-  (:require [numberto.solvers :as s]))
+  (:require [clojure.test :refer :all]
+            [numberto.solvers :as s]))
 
 (def ^:private si s/solve-insert-ops)
 (def ^:private sin s/solve-insert-ops-num)

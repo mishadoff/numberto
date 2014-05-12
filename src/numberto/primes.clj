@@ -2,8 +2,9 @@
   (:require [numberto.validator :as v])
   (:require [numberto.math :as m]))
 
-(defn primes []
+(defn primes 
   "Lazy sequence of prime numbers"
+  []
   (letfn [(next-prime [p ps]
             (cond (some #(zero? (mod p %)) (take-while #(<= (* % %) p) ps))
                   (recur (+ p 2) ps)
@@ -11,26 +12,31 @@
     (cons 2 (lazy-seq (next-prime 3 [])))))
 
 ;; More prime numbers testing
-(defn prime? [p]
+(defn prime? 
   "test whether number is prime. Complexity O(sqrt(p))"
+  [p]
   (and (> p 1)
        (not (some #(zero? (mod p %))
                   (take-while #(<= (* % %) p) (range 2 p))))))
 
-(defn factorize [n]
+(defn factorize 
   "factorize number to prime multiplies"
+  [n]
   (v/validate n :integer #(> % 1))
   (loop [x n fact []]
     (if (= 1 x) fact
         (let [d (first (drop-while #(not (zero? (rem x %))) (primes)))]
           (recur (/ x d) (conj fact d))))))
 
-(defn totient [n]
+(defn totient 
   "Euler's totient function"
+  [n]
   (reduce * n (map #(- 1 (/ 1 %)) (distinct (factorize n)))))
 
-(defn sum-of-proper-divisors [n]
+;; TODO buggy
+(defn sum-of-proper-divisors 
   "Sum of proper divisors. d(10) = (+ 1 2 5)"
+  [n]
   (v/validate n :integer #(> % 1))
   (let [base (filter #(zero? (mod n %)) (range 2 (Math/sqrt n)))]
     (reduce + 1 (concat (map #(/ n %) base) base))))

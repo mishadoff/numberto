@@ -3,16 +3,18 @@
   (:require [numberto.validator :as v])
   (:require [numberto.math :as m]))
 
-(defn ! [n]
+(defn ! 
   "Standard factorial function. Returns 1 * 2 * 3 * ... * n"
+  [n]
   (v/validate n :integer :non-negative)
   (loop [cur n acc 1]
     (if (zero? cur) acc
         (recur (dec cur) (*' cur acc)))))
 
-(defn !! [n]
+(defn !! 
   "Improved version of factorial by factorization. 
    Works better for large numbers."
+  [n]
   (v/validate n :integer :non-negative)
   (letfn [(find-power [n k]
             (loop [total n sum 0]

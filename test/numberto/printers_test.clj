@@ -1,6 +1,6 @@
 (ns numberto.printers-test
-  (:use [clojure.test])
-  (:require [numberto.printers :as p]))
+  (:require [clojure.test :refer :all]
+            [numberto.printers :as p]))
 
 (deftest format-num-test
   (is (= "0" (p/format-num 0)))

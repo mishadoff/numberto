@@ -30,8 +30,9 @@
   (map second (iterate (fn [[a b]] [b (+' a b)]) [0 1])))
 
 ;;; Fractions
-(defn continued-fraction-sqroot [n]
+(defn continued-fraction-sqroot
   "Sequence of continued fractions"
+  [n]
   (v/validate n :integer :non-negative)
   (let [a0 (int (m/sqroot n))]
     (letfn [(next-frac [a m d]
@@ -45,7 +46,9 @@
 ;; Farey sequence. Lazy. Finite.
 ;; http://en.wikipedia.org/wiki/Farey_sequence
 
-(defn farey [n]
+(defn farey
+  "TODO: add doc"
+  [n]
   (v/validate n :integer :positive)
   (letfn [(next-farey [r1 r2]
             (let [[a b] r1 [c d] r2
@@ -56,8 +59,9 @@
     (let [a 0 b 1 c 1 d n]
       (concat [[a b] [c d]] (lazy-seq (next-farey [a b] [c d]))))))
 
-(defn palindromes []
+(defn palindromes
   "Returns sorted lazy sequence of palindromic numbers."
+  []
   (let [s (atom 1)
         pal (fn [n f]
               (let [ds (c/num->digits n)]
@@ -71,8 +75,9 @@
                      [(inc n) (pal (inc n) (if (even? @s) identity rest))]))]
     (map second (iterate next-pal [0N 0N]))))
 
-(defn collatz [n]
+(defn collatz
   "lazy collatz sequence"
+  [n]
   (v/validate n :integer :positive)
   (letfn [(next-conj [n]
             (cons n 

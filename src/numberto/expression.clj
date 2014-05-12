@@ -54,14 +54,16 @@
          (map #(str "\\" %))
          (zipmap esc-chars))))
 
-(defn- validate-tokens [expr tokens]
+(defn- validate-tokens 
   "return tokens if expr is fully parsed, otherwise IAE is thrown"
+  [expr tokens]
   (let [not-parsed (reduce #(s/replace-first %1 %2 "") expr tokens)]
     (if (empty? (s/trim not-parsed)) tokens
         (token-error not-parsed))))
 
-(defn- tokenize [expr ops]
+(defn- tokenize
   "split expression into list of known tokens"
+  [expr ops]
   (->> ops             ;; building tokenization regexp
        (sort-by count) ;; longest symbols comes first
        (reverse)       
@@ -87,11 +89,12 @@
                               tagged-tokens
                               [[nil :gap nil]]))))
 
-(defn- tag [tokens {:keys [binary-ops unary-ops] :as conf}]
+(defn- tag 
   "Tag the tokens type. Almost all tokens can be tagged
 independently, except ones that need context.
 Context captured for left and right neighbour.
 Returns the triple [original value, tag, real value+meta]"
+  [tokens {:keys [binary-ops unary-ops] :as conf}]
   (-> (map
        (fn [[left token right]]
          (cond (= (count (re-find #"\d+" token)) (count token))
@@ -109,9 +112,10 @@ Returns the triple [original value, tag, real value+meta]"
        (partition 3 1 (concat [:gap] tokens [:gap])))
       (tag-postprocess conf))) ;; handle unaries
 
-(defn- infix->postfix [e {:keys [binary-ops unary-ops bindings] :as conf}]
+(defn- infix->postfix 
   "Parse infix expression into Reverse Polish Notation.
 Shunting-Yard algorithm. Supported operations defined in configuration var"
+  [e {:keys [binary-ops unary-ops bindings] :as conf}]
   (let [tokens (->> (concat (keys binary-ops) (keys unary-ops))
                     (tokenize e)
                     (#(tag % conf))
@@ -192,8 +196,9 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
             
             (v/throw-iae "Not supported yet")))))))
 
-(defn- eval-postfix [postfix bindings]
+(defn- eval-postfix 
   "Evaluates postfix expression. 1 2 + => 3"
+  [postfix bindings]
   (let [take-and-drop (fn [n stack f]
                         (->> (take n stack)
                              (#(if-not (= n (count %)) (parse-error) %))

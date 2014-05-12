@@ -1,6 +1,6 @@
 (ns numberto.seqs-test
-  (:use [clojure.test])
-  (:require [numberto.seqs :as s]))
+  (:require [clojure.test :refer :all]
+            [numberto.seqs :as s]))
 
 (deftest naturals-test
   (is (= [1 2 3 4 5] (take 5 s/naturals))))

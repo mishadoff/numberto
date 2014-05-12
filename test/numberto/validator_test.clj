@@ -1,6 +1,6 @@
 (ns numberto.validator-test
-  (:use [clojure.test])
-  (:require [numberto.validator :as v]))
+  (:require [clojure.test :refer :all]
+            [numberto.validator :as v]))
 
 (deftest validate-test
   (is (nil? (v/validate 10 :integer)))

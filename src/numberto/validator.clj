@@ -26,7 +26,7 @@
      (validate-fn e f (str "[" e "] does not satisfy fn [" f "]"))))
 
 
-(defn validate [e & rules]
+(defn validate
   "Adhoc validation logic to prevent silly mistakes.
 If validation succesful nil is returned, otherwise - IllegalArgumentException.
 Three modes are supported:
@@ -34,8 +34,8 @@ Three modes are supported:
 1. Keyword (validate 10 :integer) - Supported keyword is bound to some predicate.
 2. Custom predicate (validate 10 #(< 5 % 15))
 3. Custom message (validate 10 [:integer \"n must be an integer\"] :number)
-
 "
+  [e & rules]
   (doseq [r rules]
     (cond
      (keyword? r) (validate-keyword e r)
@@ -44,5 +44,5 @@ Three modes are supported:
        (let [[k message] r]
          (cond (fn? k) (validate-fn e k message)
                (keyword? k) (validate-keyword e k message)
-               :else (throw-iae "Not supported element [" k "]"))))))
+               :else (throw-iae (str "Not supported element [" k "]")))))))
            

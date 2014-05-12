@@ -1,6 +1,6 @@
 (ns numberto.expression-test
-  (:use [clojure.test])
-  (:require [numberto.expression :as e]))
+  (:require [clojure.test :refer :all]
+            [numberto.expression :as e]))
 
 (def ^:private e e/eval-infix)
 (def ^:private p e/infix->prefix)

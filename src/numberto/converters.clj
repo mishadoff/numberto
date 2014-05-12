@@ -4,33 +4,37 @@
 
 ;; Number converters
 
-(defn digit? [digit]
+(defn digit?
   "Test whether number is one-digit [0-9]"
+  [digit]
   (and (integer? digit) (<= 0 digit 9)))
 
-(defn char->digit [c]
+(defn char->digit
   "Cast char to digit"
+  [c]
   (let [n (- (int c) 48)]
     (cond 
      (digit? n) n
      :else (throw (IllegalArgumentException. "char must be a convertable number")))))
 
-(defn digit->char [d]
+(defn digit->char
   "Cast digit to char"
+  [d]
   (cond
    (digit? d) (char (+ d 48))
    :else (throw (IllegalArgumentException. "digit must be a number [0-9]"))))
 
-(defn num->digits [n]
+(defn num->digits
   "Split an integer number to the list of digits"
+  [n]
   (v/validate n :integer)
   (map char->digit (seq (str n))))
 
-(defn digits->num [ds]
+(defn digits->num
   "Construct a number from list of digits"
-  (cond
-   (every? digit? ds) (bigint (apply str ds))
-   :else (throw (IllegalArgumentException. "digits must contain only numbers [0-9]"))))
+  [ds]
+  (cond (every? digit? ds) (bigint (apply str ds))
+        :else (throw (IllegalArgumentException. "digits must contain only numbers [0-9]"))))
 
 ;; Roman numbers
 
@@ -39,8 +43,9 @@
                  40 "XL" 50 "L" 90 "XC" 100 "C"
                  400 "CD" 500 "D" 900 "CM" 1000 "M"))
 
-(defn number->roman [num]
+(defn number->roman
   "Convert arabic number to Roman representation"
+  [num]
   (v/validate num :integer :positive)
   (letfn [(closest [n] 
             (->> (keys to-roman-map)
@@ -52,8 +57,9 @@
                   (recur (- n c) (conj acc c)))))]
     (apply str (map to-roman-map (roman-seq num [])))))
 
-(defn roman->number [s]
+(defn roman->number
   "Convert roman number to arabic."
+  [s]
   (let [upper-cased (s/upper-case s)]
     (v/validate upper-cased :string #(re-matches #"[MDCLXVI]+" %))
     (->> (reverse upper-cased)
@@ -62,8 +68,9 @@
          (map (partial reduce +))
          (reduce #(if (< %1 %2) (+ %1 %2) (- %1 %2))))))
 
-(defn radix-convert [num from-radix to-radix]
+(defn radix-convert
   "Convert integer in string format in base of from-radix to to-radix."
+  [num from-radix to-radix]
   (v/validate from-radix :integer [#(<= 2 % 36) "must be in range [2..36]"])
   (v/validate to-radix :integer [#(<= 2 % 36) "must be in range [2..36]"])
   (v/validate num :string 
@@ -74,5 +81,3 @@
   (-> num
       (BigInteger. from-radix)
       (.toString to-radix)))
-
-;; TODO infix

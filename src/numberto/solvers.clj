@@ -4,9 +4,10 @@
   (:require [numberto.validator  :as v])
   (:require [numberto.math       :as m]))
 
-(defn- binary-split [numbers code]
+(defn- binary-split 
   "Build splits from numbers and binary code indicates gaps
 binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
+  [numbers code]
   (->> (cons nil code)
        (#(interleave % numbers))
        (rest)
@@ -15,14 +16,16 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
        (remove empty?)
        (map c/digits->num)))
 
-(defn- fill-zeros [n]
+(defn- fill-zeros
   "Add zeros before number to create length of n
 Example: ((fill-zeros 5) 123) => 00123"
+  [n]
   (partial format (str "%0" n "d")))
 
-(defn- splits [numbers]
+(defn- splits 
   "Build all possible splits for a vector of numbers
 Example: (splits [1 2 3]) => [[123] [12 3] [1 23] [1 2 3]]"
+  [numbers]
   (let [n (dec (count numbers))
         limit (m/power* 2 n)]
     (if (zero? n) [numbers]
@@ -35,13 +38,15 @@ Example: (splits [1 2 3]) => [[123] [12 3] [1 23] [1 2 3]]"
                (map #({\0 :none \1 :gap} %))
                (binary-split numbers))))))
 
-(defn- reverse-lookup [m]
+(defn- reverse-lookup
   "Create a map where keys are vals and vice verca.
 If duplicated vals are present, result undefined"
+  [m]
   (into {} (map (fn [[a b]] [b a]) m)))
 
-(defn- valid-permute? [code ops rules]
+(defn- valid-permute? 
   "Check whether generated code for split matches the rules"
+  [code ops rules]
   (let [reverse-ops (reverse-lookup ops)]
     (loop [[r & rs] rules res true]
       (if (false? res) false
@@ -62,9 +67,10 @@ If duplicated vals are present, result undefined"
               true)))))
 
 ;; TODO duplicates?
-(defn- insert-parens [level expr]
+(defn- insert-parens
   "Generate all possible combinations of expression
 with parens up to desired level. Keep level small."
+  [level expr]
   (let [cnt (count expr)]
     (if (or (< cnt 5) (= level 0))
       nil ;; no way to insert parens
@@ -84,8 +90,9 @@ with parens up to desired level. Keep level small."
              (apply concat parens-exprs)
              (remove nil?))))))
 
-(defn- permute-ops [split ops conf]
+(defn- permute-ops 
   "Generate all possible combinations of operations for current split"
+  [split ops conf]
   (let [n (count split)]
     (if (= 1 n) [(str (first split))] ;; TODO check rules for min
         
