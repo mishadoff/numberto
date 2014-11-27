@@ -3,7 +3,6 @@
   (:require [clojure.string :as s]))
 
 ;; Number converters
-
 (defn digit?
   "Test whether number is one-digit [0-9]"
   [digit]
@@ -33,7 +32,7 @@
 (defn digits->num
   "Construct a number from list of digits"
   [ds]
-  (cond (every? digit? ds) (bigint (apply str ds))
+  (cond (every? digit? ds) (bigint (clojure.string/join ds))
         :else (throw (IllegalArgumentException. "digits must contain only numbers [0-9]"))))
 
 ;; Roman numbers
@@ -55,7 +54,7 @@
             (if (zero? n) acc
                 (let [c (closest n)]
                   (recur (- n c) (conj acc c)))))]
-    (apply str (map to-roman-map (roman-seq num [])))))
+    (clojure.string/join (map to-roman-map (roman-seq num [])))))
 
 (defn roman->number
   "Convert roman number to arabic."

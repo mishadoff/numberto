@@ -12,7 +12,8 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
        (#(interleave % numbers))
        (rest)
        (partition-by #(= :gap %))
-       (map #(remove (fn [e] (#{:gap :none} e)) %))
+       (map #(remove (fn [e] (or (= :gap e)
+                                 (= :none e))) %))
        (remove empty?)
        (map c/digits->num)))
 
@@ -139,5 +140,4 @@ with parens up to desired level. Keep level small."
   ([numbers result]
      (solve-insert-ops-num numbers result {}))
   ([numbers result conf]
-     (->> (solve-insert-ops numbers conf)
-          (filter #(= result (first %))))))
+     (filter #(= result (first %)) (solve-insert-ops numbers conf))))

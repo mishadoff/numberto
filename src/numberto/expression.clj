@@ -18,12 +18,11 @@
    
    :unary-ops
    {"-"   {:function -}}
-   
+
    :bindings
-   {;; Functions
-    "cos"       #(Math/cos %)
+   {"cos"       #(Math/cos %)
     "sin"       #(Math/sin %)
-    "sum"       #(m/sum %&) 
+    "sum"       #(m/sum %&)
     "max"       max
     "min"       min
     "avg"       #(m/avg %&)
@@ -33,7 +32,8 @@
     ;; Symbols
     "e"         m/E
     "pi"        m/PI
-    }})
+    }
+   })
 
 (defn- parse-error []
   (v/throw-iae "Invalid expression"))
@@ -95,22 +95,21 @@ independently, except ones that need context.
 Context captured for left and right neighbour.
 Returns the triple [original value, tag, real value+meta]"
   [tokens {:keys [binary-ops unary-ops] :as conf}]
-  (-> (map
-       (fn [[left token right]]
-         (cond (= (count (re-find #"\d+" token)) (count token))
-               [token :number (bigint token)]
-               (= (count (re-find #"\d+\.\d+" token)) (count token))
-               [token :number (Double/parseDouble token)]
-               (= "(" token) [token :left-paren \(]
-               (= ")" token) [token :right-paren \)]
-               (= "," token) [token :arg-separator \,]
-               (binary-ops token) [token :binary (assoc (binary-ops token) :arity 2)]
-               (unary-ops token) [token :unary (assoc (unary-ops token) :arity 1)]
-               (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
-               (if (= "(" right) [token :function token] [token :symbol token])
-               :else (token-error token)))
-       (partition 3 1 (concat [:gap] tokens [:gap])))
-      (tag-postprocess conf))) ;; handle unaries
+  (tag-postprocess (map
+                    (fn [[left token right]]
+                      (cond (= (count (re-find #"\d+" token)) (count token))
+                            [token :number (bigint token)]
+                            (= (count (re-find #"\d+\.\d+" token)) (count token))
+                            [token :number (Double/parseDouble token)]
+                            (= "(" token) [token :left-paren \(]
+                            (= ")" token) [token :right-paren \)]
+                            (= "," token) [token :arg-separator \,]
+                            (binary-ops token) [token :binary (assoc (binary-ops token) :arity 2)]
+                            (unary-ops token) [token :unary (assoc (unary-ops token) :arity 1)]
+                            (= (count (re-find #"[a-zA-Z_][a-zA-Z_0-9]*" token)) (count token))
+                            (if (= "(" right) [token :function token] [token :symbol token])
+                            :else (token-error token)))
+                    (partition 3 1 (concat [:gap] tokens [:gap]))) conf)) ;; handle unaries
 
 (defn- infix->postfix 
   "Parse infix expression into Reverse Polish Notation.
@@ -149,7 +148,7 @@ Shunting-Yard algorithm. Supported operations defined in configuration var"
                 (recur p (conj output triple) (pop opstack) funstack arity))))
         ;; Token processing
         (let [[op1 tag props :as triple] (nth tokens p)
-              [_ prevtag _ :as prev] (if (> p 0) (nth tokens (dec p)) nil)]
+              [_ prevtag _ :as prev] (when (pos? p) (nth tokens (dec p)))]
           (when *DEBUG*
             (println "Token: " triple)
             (println "----------------------"))

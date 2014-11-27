@@ -70,7 +70,7 @@
                  first))
           (less100 [num hundred] ;; merge 100 + 1000
             (loop [n num s hundred]
-              (if (zero? n) (apply str (interpose " " s))
+              (if (zero? n) (clojure.string/join " " s)
                   (let [close (closest n)]
                     (recur (- n close) (conj s (get number-names close)))))))
           (less1000 [num]

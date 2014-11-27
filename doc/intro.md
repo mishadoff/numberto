@@ -133,7 +133,7 @@ There is also a factorial version `!!` optimized for big numbers.
 
 `(:use [numberto.seqs])`
 
-Lazy sequences are good composable objects. Always cut results before output.
+Lazy sequences are great. Always cut results before output.
 
 ``` clojure
 (take 10 naturals) => (1 2 3 4 5 6 7 8 9 10)
