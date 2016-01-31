@@ -6,7 +6,10 @@
    :string string? 
    :positive pos?
    :negative neg?
-   :non-negative (comp not neg?)})
+   :non-negative (comp not neg?)
+   :nil nil?
+   :not-nil (comp not nil?)
+   })
 
 (defn throw-iae [message] (throw (IllegalArgumentException. message)))
 

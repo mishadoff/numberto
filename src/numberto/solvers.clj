@@ -1,8 +1,9 @@
 (ns numberto.solvers
-  (:require [numberto.converters :as c])
-  (:require [numberto.expression :as e])
-  (:require [numberto.validator  :as v])
-  (:require [numberto.math       :as m]))
+  (:require [clojure.string :as str]
+            [numberto.converters :as c]
+            [numberto.expression :as e]
+            [numberto.validator  :as v]
+            [numberto.math       :as m]))
 
 (defn- binary-split 
   "Build splits from numbers and binary code indicates gaps
@@ -17,6 +18,7 @@ binary-split [1 2 3 4] [:gap :none :gap]) => [1 23 4]"
        (remove empty?)
        (map c/digits->num)))
 
+;; TODO move fill zeros to converters
 (defn- fill-zeros
   "Add zeros before number to create length of n
 Example: ((fill-zeros 5) 123) => 00123"
@@ -141,3 +143,57 @@ with parens up to desired level. Keep level small."
      (solve-insert-ops-num numbers result {}))
   ([numbers result conf]
      (filter #(= result (first %)) (solve-insert-ops numbers conf))))
+
+;; TODO :distinct flag
+(defn solve-digit-equation
+  "Solve Digit Exression
+
+  Assuming you have a numeric equation with a digits
+  hidden by a latin character and you need
+  to find the origin of expression.
+
+  Examples:
+  A+B=C      => [\"1+2=3\"    {\"A\" : 1, \"B\" : 2, \"C\" : 3}, etc.]
+  A1+B2=7C   => [\"11+62=73\" {\"A\" : 1, \"B\" : 6, \"C\" : 3}, etc.]
+
+  Note: Some expression could have a multiple solutions
+
+  Distinct flag indicates that you can not use the same digit
+  for different letters
+  
+  "
+  ([equation distinct?]
+   (let [error-message
+         "Equation should be in form <left-side> = <right-side>"]
+     (v/validate equation
+                 [:string error-message]
+                 [#(re-matches #".+=.+" %) error-message])
+     (let [[e1 e2 :as split-sides] (str/split equation #"=")
+           unknown-characters (distinct (re-seq #"[a-zA-Z]" equation))
+           permute-cardinality (count unknown-characters)
+           replace-mappings (fn [s mappings]
+                              (reduce (fn [acc [k v]]
+                                        (str/replace acc k v))  s mappings))]
+       (v/validate split-sides [#(= 2 (count %)) error-message])
+       (v/validate
+        unknown-characters
+        [#(<= (count %) 6)]
+        "Only 6 distinct unknown characters allowed")
+       ;;(println "Permute cardinality " permute-cardinality)
+       (for [i (range (m/power 10 permute-cardinality))
+             :let [mapping (zipmap unknown-characters
+                                   (->> (format (str "%0" permute-cardinality "d") i)
+                                        (map c/char->digit)
+                                        (map str)))
+                   e1-expression (replace-mappings e1 mapping)
+                   e2-expression (replace-mappings e2 mapping)]
+             :when
+             (cond
+               distinct?
+               (and (= permute-cardinality (distinct (vals mapping)))
+                    (= (e/eval-infix e1-expression) (e/eval-infix e2-expression)))
+               :else
+               (= (e/eval-infix e1-expression) (e/eval-infix e2-expression)))]
+         [(format "%s = %s" e1-expression e2-expression) mapping]))))
+  ([equation]
+    (solve-digit-equation equation false)))

@@ -1,5 +1,12 @@
 # Changelog
 
+### 0.0.4
+
+* Moved to Clojure 1.8.0
+* Solvers for "letter-digit" expressions
+* TODO New predicates for validator
+* TODO number to fixed point
+
 ### 0.0.3
 
 * Expressions package. Eval infix expression and build prefix.

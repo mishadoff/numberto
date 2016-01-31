@@ -4,6 +4,7 @@
 
 (def ^:private si s/solve-insert-ops)
 (def ^:private sin s/solve-insert-ops-num)
+(def ^:private sde s/solve-digit-equation)
 
 (deftest solve-insert-ops-simple
   (is (= 5 (count (si [1 2]))))
@@ -28,3 +29,12 @@
   (is (= [[100 "100"]] (sin [100] 100)))
   (is (= [[1 "1+0"]] (sin [1 0] 1 {:ops ["+" "*"]})))
   (is (thrown? IllegalArgumentException (si [-1 1]))))
+
+(deftest solve-digit-equation
+  (is (= [["1 = 1" {"A" "1"}]] (sde "A=1")))
+  (is (= [["1 = 1" {"A" "1"}]] (sde "A=1")))
+  (is (= 10 (count (sde "A = B"))))
+  (is (= ["0 = 0" {"A" "0" "B" "0"}] (first (sde "A=B"))))
+  (is (= [["123+222 = 345" {"C" "2", "B" "2", "A" "2"}]]
+         (sde "123+ABC=345")))
+  )
