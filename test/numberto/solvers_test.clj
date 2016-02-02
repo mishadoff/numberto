@@ -32,9 +32,11 @@
 
 (deftest solve-digit-equation
   (is (= [["1 = 1" {"A" "1"}]] (sde "A=1")))
-  (is (= [["1 = 1" {"A" "1"}]] (sde "A=1")))
-  (is (= 10 (count (sde "A = B"))))
-  (is (= ["0 = 0" {"A" "0" "B" "0"}] (first (sde "A=B"))))
+  (is (= [["1 = 1" {"A" "1"}]] (sde "A=1" :distinct? true)))
+  (is (= 10 (count (sde "A = B" :distinct? false))))
+  (is (= 0 (count (sde "A = B" :distinct? true))))
+  (is (= ["0 = 0" {"A" "0" "B" "0"}] (first (sde "A = B" :distinct? false))))
   (is (= [["123+222 = 345" {"C" "2", "B" "2", "A" "2"}]]
-         (sde "123+ABC=345")))
+         (sde "123+ABC=345" :distinct? false)))
+  (is (= "27 * 37 = 999"(ffirst (sde "YE * ME = TTT"))))
   )
