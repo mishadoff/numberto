@@ -1,4 +1,4 @@
-# numberto ![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)
+# numberto [![Build Status](https://api.travis-ci.org/mishadoff/numberto.png)](https://travis-ci.org/mishadoff/numberto) [![Coverage Status](https://coveralls.io/repos/github/mishadoff/numberto/badge.svg?branch=master)](https://coveralls.io/github/mishadoff/numberto?branch=master)
 
 All you need to play with numbers
 
