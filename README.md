@@ -2,7 +2,7 @@
 
 All you need to play with numbers
 
-`[numberto "0.0.3"]`
+`[numberto "0.0.4"]`
 
 [Changelog](https://github.com/mishadoff/numberto/blob/master/doc/changelog.md)
 

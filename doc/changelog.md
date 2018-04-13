@@ -2,10 +2,10 @@
 
 ### 0.0.4
 
-* Moved to Clojure 1.8.0
+* Number reader package. Handles singular and plurals in English, Ukrainian and Russian
 * Solvers for "letter-digit" expressions
-* TODO New predicates for validator
-* TODO number to fixed point
+* Fixed nasty bug in `format-ratio` function
+* Moved to Clojure 1.9.0
 
 ### 0.0.3
 

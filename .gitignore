@@ -12,5 +12,6 @@ pom.xml
 \#*\#
 .\#*
 *.asc
+*.iml
 /.nrepl-port
 /.lein-repl-history

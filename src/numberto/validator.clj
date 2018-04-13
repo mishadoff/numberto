@@ -5,6 +5,7 @@
    :number number?
    :string string? 
    :positive pos?
+   :ratio ratio?
    :negative neg?
    :non-negative (comp not neg?)
    :nil nil?

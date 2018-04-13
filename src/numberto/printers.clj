@@ -22,74 +22,26 @@
 
 (defn format-ratio 
   "Print ratio number with limit accuracy"
-  [ratio limit]
-  ;; TODO tests
-  (v/validate ratio :number)
+  [num limit]
+  (v/validate num [#(or (ratio? %) (integer? %)) "Number should be ratio or integer"])
   (v/validate limit :integer)
-  (let [numbers
-        (if (ratio? ratio)
-          (loop [n (numerator ratio) d (denominator ratio) it 0 res []]
+  (let [[init-n init-d] (if (ratio? num) [(numerator num) (denominator num)] [num 1])
+        numbers
+        (loop [n init-n d init-d it -2 res []]
             (cond (= it limit) res
                   (= 0 n) res
                   (< n d) (recur (* 10 n) d (inc it) (conj res 0))
-                  (>= n d) (recur (* 10 (mod n d)) d (inc it) (conj res (quot n d)))))
-          (cons ratio (repeat (dec limit) 0)))]
-    (apply str (concat [(first numbers) "."] (rest numbers))))) 
-        
-
-(def ^:private number-names 
-  {1 "one" 2 "two" 3 "three" 4 "four" 5 "five" 6 "six" 7 "seven"
-   8 "eight" 9 "nine" 10 "ten" 11 "eleven" 12 "twelve" 13 "thirteen"
-   14 "fourteen" 15 "fifteen" 16 "sixteen" 17 "seventeen" 18 "eighteen"
-   19 "nineteen" 20 "twenty" 30 "thirty" 40 "forty" 50 "fifty"
-   60 "sixty" 70 "seventy" 80 "eighty" 90 "ninety" 100 "hundred"})
-
-;; number means *3 zeros
-(def ^:private big-names
-  {1 "thousand" 2 "million" 3 "billion" 4 "trillion" 5 "quadrillion"
-   6 "quintillion" 7 "sextillion" 8 "septillion" 9 "octillion"
-   10 "ninillion" 11 "decillion" 12 "undecillion" 13 "duodecillion"
-   14 "tredecillion" 15 "quattuordecillion" 16 "quindecillion"
-   17 "sexdecillion" 18 "septendecillion" 19 "octodecillion" 
-   20 "novemdecillion" 21 "vigintillion" 22 "unvigintillion"
-   23 "duovigintillion" 24 "trevigintillion" 25 "quattuorvigintillion"
-   26 "quinvigintillion" 27 "sexvigintillion" 28 "septenvigintillion"
-   29 "octovigintillion" 30 "novemvigintillion" 31 "trigintillion"
-   32 "untrigintillion" 33 "duotrigintillion"})
-
-(defn number-name 
-  "Convert number to english word representation. 
-   10^102 max number supported."
-  [num]
-  (v/validate num :integer #(< (m/count-digits %) 102))
-  (letfn [(closest [num]
-            (->> (keys number-names)
-                 sort
-                 reverse
-                 (drop-while #(> % num))
-                 first))
-          (less100 [num hundred] ;; merge 100 + 1000
-            (loop [n num s hundred]
-              (if (zero? n) (clojure.string/join " " s)
-                  (let [close (closest n)]
-                    (recur (- n close) (conj s (get number-names close)))))))
-          (less1000 [num]
-            (let [k (quot num 100)]
-              (if (zero? k) (less100 num [])
-                  (less100 (mod num 100) [(get number-names k)
-                                          (get number-names 100)]))))
-          (bignum-indexed [i num]
-            (let [s (less1000 num)]
-              (if (pos? i) 
-                (if-not (empty? s) (str s " " (get big-names i)))
-                (if-not (empty? s) s))))]
-    (->> num
-         c/num->digits
-         reverse
-         (partition 3 3 [0 0 0])
-         (map #(c/digits->num (reverse %)))
-         (map-indexed bignum-indexed)
-         reverse
-         (remove nil?)
-         (interpose " ")
-         (apply str))))
+                  (>= n d) (recur (* 10 (mod n d)) d (inc it) (conj res (quot n d)))))]
+    (-> numbers
+        ((fn [ns] (into ns (repeat (- (+ limit 2) (count ns)) 0)))) ;; fill with zeros
+        ((fn [ns] (let [f (if (>= (last ns) 5) inc identity)] ;; first rounding
+                    (-> ns
+                        (subvec 0 (dec (count ns)))
+                        (update (- (count ns) 2) f)))))
+        ((fn [ns]
+           (loop [i (dec (count ns)) new-ns ns]
+             (cond (or (< i 1) (< (nth new-ns i) 10)) new-ns
+                   :else (recur (dec i) (-> new-ns
+                                            (assoc i 0)
+                                            (update (dec i) inc)))))))
+        ((fn [[d & fs]] (str d (when-not (empty? fs) (apply str "." fs))))))))
